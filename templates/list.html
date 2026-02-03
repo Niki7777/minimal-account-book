@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>极简账本 - 消费列表</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>极简账本（MVP版）</h1>
+        <div class="nav">
+            <a href="/">首页</a>
+            <a href="/list" class="active">消费列表</a>
+            <a href="/pending">待收货（<span id="pendingCount">{{ pending_count if pending_count else 0 }}</span>）</a>
+            <a href="/price">价格查询</a>
+        </div>
+        <div class="list-container">
+            <h2>消费项列表</h2>
+            <table class="consumption-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>消费内容</th>
+                        <th>数量</th>
+                        <th>总价（元）</th>
+                        <th>渠道</th>
+                        <th>大类</th>
+                        <th>细分类型</th>
+                        <th>收货状态</th>
+                        <th>购买时间</th>
+                        <th>最小单位单价（元）</th>
+                        <th>打标</th>
+                        <th>日均价（元）</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in consumption_list %}
+                    <tr>
+                        <td>{{ item.id }}</td>
+                        <td>{{ item.content }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.total_price }}</td>
+                        <td>{{ item.channel }}</td>
+                        <td>{{ item.main_type }}</td>
+                        <td>{{ item.sub_type }}</td>
+                        <td>{{ item.receive_status }}</td>
+                        <td>{{ item.create_time }}</td>
+                        <td>{{ item.min_unit_price }}</td>
+                        <td>
+                            <select class="tag-select" data-id="{{ item.id }}">
+                                <option value="" {% if item.tag == '' %}selected{% endif %}>无</option>
+                                <option value="回购" {% if item.tag == '回购' %}selected{% endif %}>回购</option>
+                                <option value="踩雷" {% if item.tag == '踩雷' %}selected{% endif %}>踩雷</option>
+                                <option value="待定" {% if item.tag == '待定' %}selected{% endif %}>待定</option>
+                            </select>
+                        </td>
+                        <td>
+                            {% if item.daily_average_price > 0 %}
+                            {{ item.daily_average_price }}
+                            {% else %}
+                            <button class="btn small-btn edit-daily-price" data-id="{{ item.id }}" data-total-price="{{ item.total_price }}">设置</button>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <button class="btn small-btn delete-btn" data-id="{{ item.id }}">删除</button>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="13" class="empty-tip">暂无消费项数据，快去首页新增吧～</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 日均价设置弹窗 -->
+    <div class="modal" id="dailyPriceModal">
+        <div class="modal-content">
+            <h3>设置使用时间及日均价</h3>
+            <input type="hidden" id="modalId">
+            <input type="hidden" id="modalTotalPrice">
+            <div class="form-group">
+                <label for="startUseTime">开始使用时间：</label>
+                <input type="date" id="startUseTime" required>
+            </div>
+            <div class="form-group">
+                <label for="endUseTime">结束使用时间：</label>
+                <input type="date" id="endUseTime" required>
+            </div>
+            <div class="modal-btn-group">
+                <button class="btn" id="saveDailyPrice">保存</button>
+                <button class="btn cancel-btn" id="closeModal">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/script.js"></script>
+</body>
+</html>
