@@ -2,102 +2,636 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>极简账本 - 消费列表</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+    <title>消费列表 - 极简记账本</title>
+    <style>
+        /* 全局通用样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        /* 导航栏样式 */
+        .navbar {
+            background-color: #2c3e50;
+            color: white;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .navbar-title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .navbar-menu {
+            display: flex;
+            gap: 24px;
+        }
+
+        .navbar-menu a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .navbar-menu a:hover {
+            background-color: #34495e;
+        }
+
+        .navbar-menu a.active {
+            background-color: #1abc9c;
+        }
+
+        /* 待收货数量提示 */
+        .pending-count {
+            background-color: #e74c3c;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 14px;
+            margin-left: 8px;
+        }
+
+        /* 容器样式 */
+        .container {
+            max-width: 1200px;
+            margin: 32px auto;
+            padding: 0 24px;
+        }
+
+        /* 页面标题 */
+        .page-title {
+            font-size: 24px;
+            color: #2c3e50;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #1abc9c;
+        }
+
+        /* 按钮通用样式 */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            background-color: #1abc9c;
+            color: white;
+            margin: 10px 8px 10px 0;
+        }
+
+        .btn:hover {
+            background-color: #16a085;
+        }
+
+        /* 弹窗样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            width: 90%;
+            max-width: 600px;
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            position: relative;
+        }
+
+        .modal-content h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .modal-content span[onclick] {
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            cursor: pointer;
+            font-size: 20px;
+            color: #7f8c8d;
+            transition: color 0.3s;
+        }
+
+        .modal-content span[onclick]:hover {
+            color: #e74c3c;
+        }
+
+        /* 表单项样式 */
+        .form-item {
+            margin: 16px 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .form-item label {
+            font-size: 16px;
+            color: #2c3e50;
+            font-weight: 500;
+            width: 100px;
+        }
+
+        .form-item input, .form-item select {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .form-item input:focus, .form-item select:focus {
+            border-color: #1abc9c;
+        }
+
+        /* 表格通用样式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 16px 0;
+        }
+
+        th, td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* 操作按钮样式 */
+        .action-btn {
+            padding: 8px 16px;
+            margin: 0 4px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .action-btn[style*="background: #ffc107"] {
+            background-color: #ffc107;
+            color: #2c3e50;
+        }
+
+        .action-btn[style*="background: #ffc107"]:hover {
+            background-color: #e0a800;
+        }
+
+        .action-btn[style*="background: #dc3545"] {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .action-btn[style*="background: #dc3545"]:hover {
+            background-color: #c0392b;
+        }
+
+        /* 批量新增相关 */
+        .add-more {
+            color: #1abc9c;
+            cursor: pointer;
+            margin: 16px 0;
+            font-size: 16px;
+            transition: color 0.3s;
+        }
+
+        .add-more:hover {
+            color: #16a085;
+        }
+
+        .batch-item {
+            border: 1px solid #ecf0f1;
+            padding: 16px;
+            margin: 16px 0;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+        }
+
+        /* 响应式适配 */
+        @media (max-width: 768px) {
+            .navbar-menu {
+                gap: 12px;
+            }
+
+            .form-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .form-item label {
+                width: 100%;
+            }
+
+            .form-item input, .form-item select {
+                width: 100%;
+            }
+
+            th, td {
+                padding: 12px 8px;
+                font-size: 14px;
+            }
+
+            .page-title {
+                font-size: 20px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>极简账本（MVP版）</h1>
-        <div class="nav">
-            <a href="/">首页</a>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="navbar-title">极简记账本</div>
+        <div class="navbar-menu">
+            <a href="/">统计首页</a>
             <a href="/list" class="active">消费列表</a>
-            <a href="/pending">待收货（<span id="pendingCount">{{ pending_count if pending_count else 0 }}</span>）</a>
+            <a href="/pending">待收货 <span class="pending-count">{{ pending_count }}</span></a>
             <a href="/price">价格查询</a>
+            <a href="/manage">管理页面</a>
         </div>
-        <div class="list-container">
-            <h2>消费项列表</h2>
-            <table class="consumption-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>消费内容</th>
-                        <th>数量</th>
-                        <th>总价（元）</th>
-                        <th>渠道</th>
-                        <th>大类</th>
-                        <th>细分类型</th>
-                        <th>收货状态</th>
-                        <th>购买时间</th>
-                        <th>最小单位单价（元）</th>
-                        <th>打标</th>
-                        <th>日均价（元）</th>
-                        <th>操作</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in consumption_list %}
-                    <tr>
-                        <td>{{ item.id }}</td>
-                        <td>{{ item.content }}</td>
-                        <td>{{ item.quantity }}</td>
-                        <td>{{ item.total_price }}</td>
-                        <td>{{ item.channel }}</td>
-                        <td>{{ item.main_type }}</td>
-                        <td>{{ item.sub_type }}</td>
-                        <td>{{ item.receive_status }}</td>
-                        <td>{{ item.create_time }}</td>
-                        <td>{{ item.min_unit_price }}</td>
-                        <td>
-                            <select class="tag-select" data-id="{{ item.id }}">
-                                <option value="" {% if item.tag == '' %}selected{% endif %}>无</option>
-                                <option value="回购" {% if item.tag == '回购' %}selected{% endif %}>回购</option>
-                                <option value="踩雷" {% if item.tag == '踩雷' %}selected{% endif %}>踩雷</option>
-                                <option value="待定" {% if item.tag == '待定' %}selected{% endif %}>待定</option>
+    </nav>
+
+    <!-- 主容器 -->
+    <div class="container">
+        <h1 class="page-title">消费列表管理</h1>
+
+        <button class="btn" onclick="openAddModal()">新增消费项</button>
+        <button class="btn" onclick="openBatchModal()">批量新增</button>
+
+        <!-- 单条新增弹窗 -->
+        <div class="modal" id="addModal">
+            <div class="modal-content">
+                <span onclick="closeAddModal()">&times;</span>
+                <h3>新增消费项</h3>
+                <div class="form-item">
+                    <label>消费内容：</label>
+                    <input type="text" id="content" placeholder="请输入消费内容">
+                </div>
+                <div class="form-item">
+                    <label>数量：</label>
+                    <input type="number" id="quantity" value="1" step="0.1">
+                </div>
+                <div class="form-item">
+                    <label>总价：</label>
+                    <input type="number" id="totalPrice" value="0" step="0.01">
+                </div>
+                <div class="form-item">
+                    <label>购买渠道：</label>
+                    <select id="channel">
+                        {% for ch in channels %}
+                        <option value="{{ ch.name }}">{{ ch.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-item">
+                    <label>账单大类：</label>
+                    <select id="mainType">
+                        {% for mt in main_types %}
+                        <option value="{{ mt.name }}">{{ mt.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-item">
+                    <label>细分类型：</label>
+                    <select id="subType">
+                        {% for st in sub_types %}
+                        <option value="{{ st.name }}">{{ st.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-item">
+                    <label>换算系数：</label>
+                    <input type="number" id="unitCoefficient" value="1" step="0.1">
+                </div>
+                <div class="form-item">
+                    <label>收货状态：</label>
+                    <select id="receiveStatus">
+                        <option value="已收货">已收货</option>
+                        <option value="待收货">待收货</option>
+                    </select>
+                </div>
+                <button class="btn" onclick="submitAdd()">提交</button>
+            </div>
+        </div>
+
+        <!-- 批量新增弹窗 -->
+        <div class="modal" id="batchModal">
+            <div class="modal-content">
+                <span onclick="closeBatchModal()">&times;</span>
+                <h3>批量新增消费项</h3>
+                <div id="batchFormContainer">
+                    <!-- 初始一行 -->
+                    <div class="batch-item">
+                        <div class="form-item">
+                            <label>消费内容：</label>
+                            <input type="text" class="batch-content" placeholder="请输入消费内容">
+                        </div>
+                        <div class="form-item">
+                            <label>数量：</label>
+                            <input type="number" class="batch-quantity" value="1" step="0.1">
+                        </div>
+                        <div class="form-item">
+                            <label>总价：</label>
+                            <input type="number" class="batch-totalPrice" value="0" step="0.01">
+                        </div>
+                        <div class="form-item">
+                            <label>购买渠道：</label>
+                            <select class="batch-channel">
+                                {% for ch in channels %}
+                                <option value="{{ ch.name }}">{{ ch.name }}</option>
+                                {% endfor %}
                             </select>
-                        </td>
-                        <td>
-                            {% if item.daily_average_price > 0 %}
-                            {{ item.daily_average_price }}
-                            {% else %}
-                            <button class="btn small-btn edit-daily-price" data-id="{{ item.id }}" data-total-price="{{ item.total_price }}">设置</button>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <button class="btn small-btn delete-btn" data-id="{{ item.id }}">删除</button>
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="13" class="empty-tip">暂无消费项数据，快去首页新增吧～</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- 日均价设置弹窗 -->
-    <div class="modal" id="dailyPriceModal">
-        <div class="modal-content">
-            <h3>设置使用时间及日均价</h3>
-            <input type="hidden" id="modalId">
-            <input type="hidden" id="modalTotalPrice">
-            <div class="form-group">
-                <label for="startUseTime">开始使用时间：</label>
-                <input type="date" id="startUseTime" required>
-            </div>
-            <div class="form-group">
-                <label for="endUseTime">结束使用时间：</label>
-                <input type="date" id="endUseTime" required>
-            </div>
-            <div class="modal-btn-group">
-                <button class="btn" id="saveDailyPrice">保存</button>
-                <button class="btn cancel-btn" id="closeModal">取消</button>
+                        </div>
+                        <div class="form-item">
+                            <label>账单大类：</label>
+                            <select class="batch-mainType">
+                                {% for mt in main_types %}
+                                <option value="{{ mt.name }}">{{ mt.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-item">
+                            <label>细分类型：</label>
+                            <select class="batch-subType">
+                                {% for st in sub_types %}
+                                <option value="{{ st.name }}">{{ st.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="add-more" onclick="addMoreBatchItem()">+ 新增一行</div>
+                <button class="btn" onclick="submitBatch()">批量提交</button>
             </div>
         </div>
+
+        <!-- 消费列表表格 -->
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>消费内容</th>
+                    <th>数量</th>
+                    <th>总价</th>
+                    <th>渠道</th>
+                    <th>大类</th>
+                    <th>细分类型</th>
+                    <th>收货状态</th>
+                    <th>创建时间</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="consumptionTable">
+                <!-- 动态加载数据 -->
+            </tbody>
+        </table>
     </div>
 
-    <script src="/static/js/script.js"></script>
+    <script>
+        // 加载消费列表
+        function loadConsumptionList() {
+            fetch('/api/consumption')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const table = document.getElementById('consumptionTable');
+                        table.innerHTML = '';
+                        data.data.forEach(item => {
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `
+                                <td>${item.id}</td>
+                                <td>${item.content}</td>
+                                <td>${item.quantity}</td>
+                                <td>${item.total_price}</td>
+                                <td>${item.channel}</td>
+                                <td>${item.main_type}</td>
+                                <td>${item.sub_type}</td>
+                                <td>${item.receive_status}</td>
+                                <td>${item.create_time}</td>
+                                <td>
+                                    <button class="action-btn" style="background: #ffc107;" onclick="editItem(${JSON.stringify(item).replace(/"/g, '&quot;')})">修改</button>
+                                    <button class="action-btn" style="background: #dc3545;" onclick="deleteItem(${item.id})">删除</button>
+                                </td>
+                            `;
+                            table.appendChild(tr);
+                        });
+                    } else {
+                        alert(data.message);
+                    }
+                });
+        }
+
+        // 单条新增弹窗
+        function openAddModal() {
+            document.getElementById('addModal').style.display = 'flex';
+        }
+        function closeAddModal() {
+            document.getElementById('addModal').style.display = 'none';
+        }
+        function submitAdd() {
+            const data = {
+                content: document.getElementById('content').value,
+                quantity: document.getElementById('quantity').value,
+                totalPrice: document.getElementById('totalPrice').value,
+                channel: document.getElementById('channel').value,
+                mainType: document.getElementById('mainType').value,
+                subType: document.getElementById('subType').value,
+                unitCoefficient: document.getElementById('unitCoefficient').value,
+                receiveStatus: document.getElementById('receiveStatus').value
+            };
+            fetch('/api/consumption', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    closeAddModal();
+                    loadConsumptionList();
+                } else {
+                    alert(data.message);
+                }
+            });
+        }
+
+        // 批量新增弹窗
+        function openBatchModal() {
+            document.getElementById('batchModal').style.display = 'flex';
+        }
+        function closeBatchModal() {
+            document.getElementById('batchModal').style.display = 'none';
+        }
+        function addMoreBatchItem() {
+            const container = document.getElementById('batchFormContainer');
+            const newItem = document.createElement('div');
+            newItem.className = 'batch-item';
+            newItem.innerHTML = `
+                <div class="form-item">
+                    <label>消费内容：</label>
+                    <input type="text" class="batch-content" placeholder="请输入消费内容">
+                </div>
+                <div class="form-item">
+                    <label>数量：</label>
+                    <input type="number" class="batch-quantity" value="1" step="0.1">
+                </div>
+                <div class="form-item">
+                    <label>总价：</label>
+                    <input type="number" class="batch-totalPrice" value="0" step="0.01">
+                </div>
+                <div class="form-item">
+                    <label>购买渠道：</label>
+                    <select class="batch-channel">
+                        {% for ch in channels %}
+                        <option value="{{ ch.name }}">{{ ch.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-item">
+                    <label>账单大类：</label>
+                    <select class="batch-mainType">
+                        {% for mt in main_types %}
+                        <option value="{{ mt.name }}">{{ mt.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-item">
+                    <label>细分类型：</label>
+                    <select class="batch-subType">
+                        {% for st in sub_types %}
+                        <option value="{{ st.name }}">{{ st.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            `;
+            container.appendChild(newItem);
+        }
+        function submitBatch() {
+            const items = document.querySelectorAll('.batch-item');
+            const list = [];
+            items.forEach(item => {
+                list.push({
+                    content: item.querySelector('.batch-content').value,
+                    quantity: item.querySelector('.batch-quantity').value,
+                    totalPrice: item.querySelector('.batch-totalPrice').value,
+                    channel: item.querySelector('.batch-channel').value,
+                    mainType: item.querySelector('.batch-mainType').value,
+                    subType: item.querySelector('.batch-subType').value
+                });
+            });
+            fetch('/api/consumption/batch', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ list })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    closeBatchModal();
+                    loadConsumptionList();
+                } else {
+                    alert(data.message);
+                }
+            });
+        }
+
+        // 修改消费项
+        function editItem(item) {
+            // 填充到新增弹窗（复用弹窗）
+            document.getElementById('content').value = item.content;
+            document.getElementById('quantity').value = item.quantity;
+            document.getElementById('totalPrice').value = item.total_price;
+            document.getElementById('channel').value = item.channel;
+            document.getElementById('mainType').value = item.main_type;
+            document.getElementById('subType').value = item.sub_type;
+            document.getElementById('unitCoefficient').value = item.unit_coefficient;
+            document.getElementById('receiveStatus').value = item.receive_status;
+            
+            // 替换提交按钮为更新逻辑
+            const submitBtn = document.querySelector('#addModal .btn');
+            submitBtn.onclick = function() {
+                const data = {
+                    content: document.getElementById('content').value,
+                    quantity: document.getElementById('quantity').value,
+                    totalPrice: document.getElementById('totalPrice').value,
+                    channel: document.getElementById('channel').value,
+                    mainType: document.getElementById('mainType').value,
+                    subType: document.getElementById('subType').value,
+                    unitCoefficient: document.getElementById('unitCoefficient').value,
+                    receiveStatus: document.getElementById('receiveStatus').value
+                };
+                fetch(`/api/consumption/${item.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        closeAddModal();
+                        loadConsumptionList();
+                        // 恢复提交按钮原逻辑
+                        submitBtn.onclick = submitAdd;
+                    } else {
+                        alert(data.message);
+                    }
+                });
+            };
+            openAddModal();
+        }
+
+        // 删除消费项
+        function deleteItem(id) {
+            if (confirm(`确定删除ID为${id}的消费项吗？`)) {
+                fetch(`/api/consumption/${id}`, { method: 'DELETE' })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        loadConsumptionList();
+                    } else {
+                        alert(data.message);
+                    }
+                });
+            }
+        }
+
+        // 页面加载时加载列表
+        window.onload = loadConsumptionList;
+    </script>
 </body>
 </html>

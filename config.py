@@ -1,5 +1,5 @@
 # config.py 最终版
-MYSQL_CONFIG = {
+DB_CONFIG = {
     'host': 'localhost',
     'user': 'root',
     'password': '123456',

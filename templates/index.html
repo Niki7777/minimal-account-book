@@ -2,76 +2,234 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>极简账本 - 首页</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+    <title>账单统计 - 极简记账本</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs/dayjs.min.js"></script>
+    <style>
+        /* 全局通用样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        /* 导航栏样式 */
+        .navbar {
+            background-color: #2c3e50;
+            color: white;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .navbar-title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .navbar-menu {
+            display: flex;
+            gap: 24px;
+        }
+
+        .navbar-menu a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .navbar-menu a:hover {
+            background-color: #34495e;
+        }
+
+        .navbar-menu a.active {
+            background-color: #1abc9c;
+        }
+
+        /* 待收货数量提示 */
+        .pending-count {
+            background-color: #e74c3c;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 14px;
+            margin-left: 8px;
+        }
+
+        /* 容器样式 */
+        .container {
+            max-width: 1200px;
+            margin: 32px auto;
+            padding: 0 24px;
+        }
+
+        /* 页面标题 */
+        .page-title {
+            font-size: 24px;
+            color: #2c3e50;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #1abc9c;
+        }
+
+        /* 筛选栏样式 */
+        .filter-bar {
+            margin: 20px 0;
+            padding: 24px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .filter-bar input {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .filter-bar input:focus {
+            border-color: #1abc9c;
+        }
+
+        /* 按钮通用样式 */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            background-color: #1abc9c;
+            color: white;
+        }
+
+        .btn:hover {
+            background-color: #16a085;
+        }
+
+        /* 图表容器 */
+        .chart-container {
+            width: 100%;
+            height: 500px;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            padding: 16px;
+            background-color: white;
+            margin-top: 24px;
+        }
+
+        /* 响应式适配 */
+        @media (max-width: 768px) {
+            .navbar-menu {
+                gap: 12px;
+            }
+
+            .filter-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .filter-bar input {
+                width: 100%;
+            }
+
+            .chart-container {
+                height: 300px;
+            }
+
+            .page-title {
+                font-size: 20px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>极简账本（MVP版）</h1>
-        <div class="nav">
-            <a href="/" class="active">首页</a>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="navbar-title">极简记账本</div>
+        <div class="navbar-menu">
+            <a href="/" class="active">统计首页</a>
             <a href="/list">消费列表</a>
-            <a href="/pending">待收货（<span id="pendingCount">{{ pending_count }}</span>）</a>
+            <a href="/pending">待收货 <span class="pending-count">{{ pending_count }}</span></a>
             <a href="/price">价格查询</a>
+            <a href="/manage">管理页面</a>
         </div>
-        <div class="form-container">
-            <h2>新增消费项</h2>
-            <form id="consumptionForm">
-                <div class="form-group">
-                    <label for="content">消费内容：</label>
-                    <input type="text" id="content" name="content" required placeholder="例：2包抽纸、1杯奶茶">
-                </div>
-                <div class="form-group">
-                    <label for="quantity">数量：</label>
-                    <input type="number" id="quantity" name="quantity" step="0.1" min="0.1" value="1.0" required>
-                </div>
-                <div class="form-group">
-                    <label for="totalPrice">总价（元）：</label>
-                    <input type="number" id="totalPrice" name="totalPrice" step="0.01" min="0.01" required placeholder="例：9.9、15.8">
-                </div>
-                <div class="form-group">
-                    <label for="channel">购买渠道：</label>
-                    <select id="channel" name="channel" required>
-                        <option value="">请选择渠道</option>
-                        <option value="超市">超市</option>
-                        <option value="淘宝">淘宝</option>
-                        <option value="京东">京东</option>
-                        <option value="拼多多">拼多多</option>
-                        <option value="其他">其他</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="mainType">账单大类：</label>
-                    <select id="mainType" name="mainType" required>
-                        <option value="">请选择大类</option>
-                        <option value="饮食">饮食</option>
-                        <option value="日用品">日用品</option>
-                        <option value="出行">出行</option>
-                        <option value="娱乐">娱乐</option>
-                        <option value="其他">其他</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="subType">细分类型：</label>
-                    <input type="text" id="subType" name="subType" required placeholder="例：纸巾、洗发水、公交">
-                </div>
-                <div class="form-group">
-                    <label for="unitCoefficient">换算系数：</label>
-                    <input type="number" id="unitCoefficient" name="unitCoefficient" step="0.1" min="0.1" value="1.0" required>
-                    <span class="tip">例：1包=5抽填5，默认1</span>
-                </div>
-                <div class="form-group">
-                    <label for="receiveStatus">收货状态：</label>
-                    <select id="receiveStatus" name="receiveStatus" required>
-                        <option value="已收货">已收货</option>
-                        <option value="待收货">待收货</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn">提交消费项</button>
-            </form>
+    </nav>
+
+    <!-- 主容器 -->
+    <div class="container">
+        <h1 class="page-title">账单统计分析</h1>
+
+        <div class="filter-bar">
+            <label>开始日期：</label>
+            <input type="date" id="startDate" value="{{ default_start }}">
+            <label>结束日期：</label>
+            <input type="date" id="endDate" value="{{ default_end }}">
+            <button class="btn" onclick="loadStatistics()">查询</button>
         </div>
+
+        <div class="chart-container" id="pieChart"></div>
     </div>
-    <script src="/static/js/script.js"></script>
+
+    <script>
+        // 初始化图表
+        const chart = echarts.init(document.getElementById('pieChart'));
+        chart.setOption({
+            title: { text: '账单大类金额统计', left: 'center' },
+            tooltip: { trigger: 'item' },
+            series: [{
+                name: '消费金额',
+                type: 'pie',
+                radius: ['40%', '70%'],
+                data: [],
+                label: {
+                    show: true,
+                    formatter: '{b}: {c}元 ({d}%)'
+                }
+            }]
+        });
+
+        // 加载统计数据
+        function loadStatistics() {
+            const start = document.getElementById('startDate').value;
+            const end = document.getElementById('endDate').value;
+            
+            fetch(`/api/consumption/statistics?startDate=${start}&endDate=${end}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const pieData = [];
+                        for (let i = 0; i < data.data.categories.length; i++) {
+                            pieData.push({
+                                name: data.data.categories[i],
+                                value: data.data.values[i]
+                            });
+                        }
+                        chart.setOption({
+                            series: [{ data: pieData }]
+                        });
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(err => alert('加载统计数据失败：' + err));
+        }
+
+        // 页面加载时默认查询
+        window.onload = loadStatistics;
+    </script>
 </body>
 </html>

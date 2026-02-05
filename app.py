@@ -1,156 +1,364 @@
-
 from datetime import datetime, timedelta
-from flask import Flask, request, jsonify
-from flask_cors import CORS  # 解决前端跨域问题（必须导入，否则前端无法调用接口）
-
-
-# 导入自定义模块（确保路径正确，适配项目结构）
+from flask import Flask, request, jsonify, render_template
+from flask_cors import CORS
 from database import (
     get_db_connection, delete_consumption, get_pending_count,
-    get_tagged_consumption, get_sub_types
+    get_tagged_consumption, get_sub_types,
+    # 新增管理相关函数（需在database.py补充，见下文）
+    add_channel, get_all_channels, delete_channel, update_channel,
+    add_main_type, get_all_main_types, delete_main_type, update_main_type,
+    add_sub_type, get_all_sub_types, delete_sub_type, update_sub_type
 )
 from utils.tools import (
     calculate_min_unit_price, calculate_daily_average_price,
     get_current_date, validate_date_format
 )
-from pymysql import Error  # 导入MySQL错误类，用于捕获异常
+from pymysql import Error
+import json
 
 # 初始化Flask应用
 app = Flask(__name__)
-# 允许前端跨域请求（关键配置，否则前端调用接口会报跨域错误）
 CORS(app)
-# 后端服务端口（固定为3000，前端代码默认调用此端口，不要修改）
 PORT = 3000
 
-# ------------------- 接口1：新增消费项（前端点击「保存消费项」调用）-------------------
-@app.route('/api/consumption', methods=['POST'])
-def add_consumption():
+# ------------------- 新增：批量添加消费项接口 -------------------
+@app.route('/api/consumption/batch', methods=['POST'])
+def batch_add_consumption():
     try:
-        # 1. 获取前端提交的JSON数据（和前端表单字段一一对应）
         data = request.get_json()
-        # 2. 提取核心字段，做基础校验（避免空值）
-        content = data.get('content')
-        quantity = float(data.get('quantity', 1.0))  # 默认为1.0，转换为浮点数
-        total_price = float(data.get('totalPrice', 0.0))  # 默认为0.0，转换为浮点数
-        channel = data.get('channel')
-        main_type = data.get('mainType')  # 前端驼峰命名，后端适配
-        sub_type = data.get('subType')    # 前端驼峰命名，后端适配
-        unit_coefficient = float(data.get('unitCoefficient', 1.0))  # 换算系数默认1.0
-        receive_status = data.get('receiveStatus', '已收货')  # 收货状态默认已收货
-
-        # 基础校验：核心字段不能为空
-        if not all([content, channel, main_type, sub_type]):
+        consumption_list = data.get('list', [])
+        if not consumption_list:
             return jsonify({
                 'success': False,
-                'message': '消费内容、购买渠道、账单大类、细分类型不能为空！'
-            }), 400  # 400状态码：请求参数错误
+                'message': '批量添加的消费项列表不能为空！'
+            }), 400
 
-        # 3. 自动计算和补充字段（无需前端传入，后端处理）
-        create_time = get_current_date()  # 自动填充当前购买日期
-        min_unit_price = calculate_min_unit_price(total_price, quantity, unit_coefficient)  # 计算最小单位单价
-        statistical_status = '计入' if receive_status == '已收货' else '不计入'  # 统计状态关联收货状态
-
-        # 4. 连接MySQL，插入数据（适配MySQL参数化查询语法：%s占位符）
         connection = get_db_connection()
         if not connection:
-            return jsonify({'success': False, 'message': '数据库连接失败，无法添加消费项！'}), 500
-
+            return jsonify({'success': False, 'message': '数据库连接失败！'}), 500
         cursor = connection.cursor()
-        # MySQL插入SQL语句（字段和consumption表完全对应）
+        inserted_ids = []
         insert_sql = '''
         INSERT INTO consumption 
         (content, quantity, total_price, channel, main_type, sub_type, unit_coefficient, 
          receive_status, create_time, statistical_status, min_unit_price)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         '''
-        # 执行插入操作（参数顺序和SQL字段顺序严格一致）
-        cursor.execute(insert_sql, (
-            content, quantity, total_price, channel, main_type, sub_type, unit_coefficient,
-            receive_status, create_time, statistical_status, min_unit_price
-        ))
-        connection.commit()  # MySQL必须提交事务才生效
-        new_id = cursor.lastrowid  # 获取新增消费项的自增ID
 
-        # 5. 查询新增的完整数据，返回给前端
-        cursor.execute('SELECT * FROM consumption WHERE id = %s', (new_id,))
-        new_consumption = cursor.fetchone()  # 字典格式，前端直接使用
+        for item in consumption_list:
+            # 字段校验
+            content = item.get('content')
+            quantity = float(item.get('quantity', 1.0))
+            total_price = float(item.get('totalPrice', 0.0))
+            channel = item.get('channel')
+            main_type = item.get('mainType')
+            sub_type = item.get('subType')
+            if not all([content, channel, main_type, sub_type]):
+                connection.rollback()
+                cursor.close()
+                connection.close()
+                return jsonify({
+                    'success': False,
+                    'message': f'消费项「{content}」的核心字段不能为空！'
+                }), 400
 
-        # 6. 关闭资源，返回成功信息
+            # 自动计算字段
+            create_time = get_current_date()
+            unit_coefficient = float(item.get('unitCoefficient', 1.0))
+            receive_status = item.get('receiveStatus', '已收货')
+            min_unit_price = calculate_min_unit_price(total_price, quantity, unit_coefficient)
+            statistical_status = '计入' if receive_status == '已收货' else '不计入'
+
+            # 执行插入
+            cursor.execute(insert_sql, (
+                content, quantity, total_price, channel, main_type, sub_type, unit_coefficient,
+                receive_status, create_time, statistical_status, min_unit_price
+            ))
+            inserted_ids.append(cursor.lastrowid)
+
+        connection.commit()
+        cursor.close()
+        connection.close()
+
+        return jsonify({
+            'success': True,
+            'message': f'批量添加{len(inserted_ids)}条消费项成功！',
+            'data': inserted_ids
+        }), 200
+
+    except Error as err:
+        return jsonify({'success': False, 'message': f'MySQL错误：{str(err)}'}), 500
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'批量添加失败：{str(e)}'}), 500
+
+# ------------------- 新增：饼图统计接口 -------------------
+@app.route('/api/consumption/statistics', methods=['GET'])
+def get_consumption_statistics():
+    try:
+        # 获取前端筛选的时间范围
+        start_date = request.args.get('startDate')
+        end_date = request.args.get('endDate')
+        
+        # 默认：当月1号至今
+        if not start_date:
+            today = datetime.now()
+            start_date = today.replace(day=1).strftime('%Y-%m-%d')
+        if not end_date:
+            end_date = get_current_date()
+
+        # 验证日期格式
+        if not validate_date_format(start_date) or not validate_date_format(end_date):
+            return jsonify({'success': False, 'message': '日期格式错误，需为YYYY-MM-DD！'}), 400
+
+        connection = get_db_connection()
+        if not connection:
+            return jsonify({'success': False, 'message': '数据库连接失败！'}), 500
+
+        cursor = connection.cursor()
+        # 按账单大类统计金额（仅计入已收货）
+        query_sql = '''
+        SELECT main_type, SUM(total_price) as total_amount 
+        FROM consumption 
+        WHERE create_time BETWEEN %s AND %s 
+        AND receive_status = '已收货' 
+        GROUP BY main_type
+        '''
+        cursor.execute(query_sql, (start_date, end_date))
+        statistics = cursor.fetchall()
+
+        # 格式化数据（适配ECharts饼图）
+        pie_data = {
+            'categories': [item['main_type'] for item in statistics],
+            'values': [round(item['total_amount'], 2) for item in statistics]
+        }
+
         cursor.close()
         connection.close()
         return jsonify({
             'success': True,
-            'message': '消费项添加成功！',
-            'data': new_consumption
-        }), 200  # 200状态码：请求成功
+            'data': pie_data,
+            'filter': {'startDate': start_date, 'endDate': end_date}
+        }), 200
 
     except Error as err:
-        # 捕获MySQL相关错误
-        return jsonify({
-            'success': False,
-            'message': f'添加消费项失败（MySQL错误）：{str(err)}',
-            'error': str(err)
-        }), 500
+        return jsonify({'success': False, 'message': f'MySQL错误：{str(err)}'}), 500
     except Exception as e:
-        # 捕获其他通用错误
-        return jsonify({
-            'success': False,
-            'message': f'添加消费项失败：{str(e)}',
-            'error': str(e)
-        }), 500
+        return jsonify({'success': False, 'message': f'统计失败：{str(e)}'}), 500
 
-# ------------------- 接口2：查询所有消费项（前端加载页面、切换列表调用）-------------------
+# ------------------- 渠道管理接口 -------------------
+@app.route('/api/channel', methods=['GET'])
+def get_channels():
+    try:
+        channels = get_all_channels()
+        return jsonify({'success': True, 'data': channels}), 200
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/channel', methods=['POST'])
+def add_channel_api():
+    try:
+        data = request.get_json()
+        name = data.get('name')
+        if not name:
+            return jsonify({'success': False, 'message': '渠道名称不能为空！'}), 400
+        add_channel(name)
+        return jsonify({'success': True, 'message': '渠道添加成功！'}), 200
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/channel/<int:id>', methods=['PUT'])
+def update_channel_api(id):
+    try:
+        data = request.get_json()
+        name = data.get('name')
+        if not name:
+            return jsonify({'success': False, 'message': '渠道名称不能为空！'}), 400
+        update_channel(id, name)
+        return jsonify({'success': True, 'message': '渠道更新成功！'}), 200
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/channel/<int:id>', methods=['DELETE'])
+def delete_channel_api(id):
+    try:
+        delete_channel(id)
+        return jsonify({'success': True, 'message': '渠道删除成功！'}), 200
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+# ------------------- 账单大类管理接口 -------------------
+@app.route('/api/main-type', methods=['GET'])
+def get_main_types():
+    try:
+        types = get_all_main_types()
+        return jsonify({'success': True, 'data': types}), 200
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/main-type', methods=['POST'])
+def add_main_type_api():
+    try:
+        data = request.get_json()
+        name = data.get('name')
+        if not name:
+            return jsonify({'success': False, 'message': '大类名称不能为空！'}), 400
+        add_main_type(name)
+        return jsonify({'success': True, 'message': '大类添加成功！'}), 200
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/main-type/<int:id>', methods=['PUT'])
+def update_main_type_api(id):
+    try:
+        data = request.get_json()
+        name = data.get('name')
+        if not name:
+            return jsonify({'success': False, 'message': '大类名称不能为空！'}), 400
+        update_main_type(id, name)
+        return jsonify({'success': True, 'message': '大类更新成功！'}), 200
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/main-type/<int:id>', methods=['DELETE'])
+def delete_main_type_api(id):
+    try:
+        delete_main_type(id)
+        return jsonify({'success': True, 'message': '大类删除成功！'}), 200
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+# ------------------- 细分类型管理接口 -------------------
+@app.route('/api/sub-type', methods=['GET'])
+def get_sub_types_api():
+    try:
+        types = get_all_sub_types()
+        return jsonify({'success': True, 'data': types}), 200
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/sub-type', methods=['POST'])
+def add_sub_type_api():
+    try:
+        data = request.get_json()
+        name = data.get('name')
+        main_type_id = data.get('mainTypeId')
+        if not name or not main_type_id:
+            return jsonify({'success': False, 'message': '名称和所属大类不能为空！'}), 400
+        add_sub_type(name, main_type_id)
+        return jsonify({'success': True, 'message': '细分类型添加成功！'}), 200
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/sub-type/<int:id>', methods=['PUT'])
+def update_sub_type_api(id):
+    try:
+        data = request.get_json()
+        name = data.get('name')
+        main_type_id = data.get('mainTypeId')
+        if not name or not main_type_id:
+            return jsonify({'success': False, 'message': '名称和所属大类不能为空！'}), 400
+        update_sub_type(id, name, main_type_id)
+        return jsonify({'success': True, 'message': '细分类型更新成功！'}), 200
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/sub-type/<int:id>', methods=['DELETE'])
+def delete_sub_type_api(id):
+    try:
+        delete_sub_type(id)
+        return jsonify({'success': True, 'message': '细分类型删除成功！'}), 200
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+# ------------------- 原有接口（保留） -------------------
+@app.route('/api/consumption', methods=['POST'])
+def add_consumption():
+    try:
+        data = request.get_json()
+        content = data.get('content')
+        quantity = float(data.get('quantity', 1.0))
+        total_price = float(data.get('totalPrice', 0.0))
+        channel = data.get('channel')
+        main_type = data.get('mainType')
+        sub_type = data.get('subType')
+        unit_coefficient = float(data.get('unitCoefficient', 1.0))
+        receive_status = data.get('receiveStatus', '已收货')
+
+        if not all([content, channel, main_type, sub_type]):
+            return jsonify({'success': False, 'message': '核心字段不能为空！'}), 400
+
+        create_time = get_current_date()
+        min_unit_price = calculate_min_unit_price(total_price, quantity, unit_coefficient)
+        statistical_status = '计入' if receive_status == '已收货' else '不计入'
+
+        connection = get_db_connection()
+        if not connection:
+            return jsonify({'success': False, 'message': '数据库连接失败！'}), 500
+
+        cursor = connection.cursor()
+        insert_sql = '''
+        INSERT INTO consumption 
+        (content, quantity, total_price, channel, main_type, sub_type, unit_coefficient, 
+         receive_status, create_time, statistical_status, min_unit_price)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        '''
+        cursor.execute(insert_sql, (
+            content, quantity, total_price, channel, main_type, sub_type, unit_coefficient,
+            receive_status, create_time, statistical_status, min_unit_price
+        ))
+        connection.commit()
+        new_id = cursor.lastrowid
+
+        cursor.execute('SELECT * FROM consumption WHERE id = %s', (new_id,))
+        new_consumption = cursor.fetchone()
+
+        cursor.close()
+        connection.close()
+        return jsonify({
+            'success': True,
+            'message': '添加成功！',
+            'data': new_consumption
+        }), 200
+
+    except Error as err:
+        return jsonify({'success': False, 'message': f'MySQL错误：{str(err)}'}), 500
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
 @app.route('/api/consumption', methods=['GET'])
 def get_all_consumption():
     try:
         connection = get_db_connection()
         if not connection:
-            return jsonify({'success': False, 'message': '数据库连接失败，无法查询数据！'}), 500
+            return jsonify({'success': False, 'message': '数据库连接失败！'}), 500
 
         cursor = connection.cursor()
-        # MySQL查询语句（按购买时间倒序，最新数据排在前面）
         cursor.execute('SELECT * FROM consumption ORDER BY create_time DESC')
-        consumption_list = cursor.fetchall()  # 字典列表，前端渲染表格直接使用
+        consumption_list = cursor.fetchall()
 
-        # 关闭资源，返回数据
         cursor.close()
         connection.close()
-        return jsonify({
-            'success': True,
-            'data': consumption_list
-        }), 200
+        return jsonify({'success': True, 'data': consumption_list}), 200
 
     except Error as err:
-        return jsonify({
-            'success': False,
-            'message': f'查询消费项失败（MySQL错误）：{str(err)}',
-            'error': str(err)
-        }), 500
+        return jsonify({'success': False, 'message': f'MySQL错误：{str(err)}'}), 500
     except Exception as e:
-        return jsonify({
-            'success': False,
-            'message': f'查询消费项失败：{str(e)}',
-            'error': str(e)
-        }), 500
+        return jsonify({'success': False, 'message': str(e)}), 500
 
-# ------------------- 接口3：更新消费项（修改状态、打标、评价等调用）-------------------
 @app.route('/api/consumption/<int:id>', methods=['PUT'])
 def update_consumption(id):
     try:
-        # 1. 获取前端修改的数据和消费项ID
         data = request.get_json()
         connection = get_db_connection()
         if not connection:
-            return jsonify({'success': False, 'message': '数据库连接失败，无法更新数据！'}), 500
+            return jsonify({'success': False, 'message': '数据库连接失败！'}), 500
 
         cursor = connection.cursor()
-        # 2. 先查询消费项是否存在
         cursor.execute('SELECT * FROM consumption WHERE id = %s', (id,))
         consumption = cursor.fetchone()
         if not consumption:
-            return jsonify({'success': False, 'message': '要修改的消费项不存在！'}), 404
+            return jsonify({'success': False, 'message': '消费项不存在！'}), 404
 
-        # 3. 提取修改字段，未修改字段保留原数据
         receive_status = data.get('receiveStatus', consumption['receive_status'])
         tag = data.get('tag', consumption['tag'])
         evaluate = data.get('evaluate', consumption['evaluate'])
@@ -161,20 +369,17 @@ def update_consumption(id):
         start_use_time = data.get('startUseTime', consumption['start_use_time'])
         end_use_time = data.get('endUseTime', consumption['end_use_time'])
 
-        # 验证时间格式（若传入时间，必须是YYYY-MM-DD）
         if start_use_time and not validate_date_format(start_use_time):
-            return jsonify({'success': False, 'message': '开始使用时间格式错误，需为YYYY-MM-DD！'}), 400
+            return jsonify({'success': False, 'message': '开始时间格式错误！'}), 400
         if end_use_time and not validate_date_format(end_use_time):
-            return jsonify({'success': False, 'message': '结束使用时间格式错误，需为YYYY-MM-DD！'}), 400
+            return jsonify({'success': False, 'message': '结束时间格式错误！'}), 400
 
-        # 4. 重新计算相关字段
         min_unit_price = calculate_min_unit_price(total_price, quantity, unit_coefficient)
         daily_average_price = calculate_daily_average_price(
             total_price, start_use_time, end_use_time
         ) if (start_use_time and end_use_time) else consumption['daily_average_price']
         statistical_status = '计入' if receive_status == '已收货' else '不计入'
 
-        # 5. 执行MySQL更新操作
         update_sql = '''
         UPDATE consumption 
         SET content = %s, quantity = %s, total_price = %s, unit_coefficient = %s,
@@ -191,68 +396,41 @@ def update_consumption(id):
         ))
         connection.commit()
 
-        # 6. 查询更新后的数据，返回给前端
         cursor.execute('SELECT * FROM consumption WHERE id = %s', (id,))
         updated_consumption = cursor.fetchone()
 
-        # 关闭资源，返回成功信息
         cursor.close()
         connection.close()
         return jsonify({
             'success': True,
-            'message': '消费项更新成功！',
+            'message': '更新成功！',
             'data': updated_consumption
         }), 200
 
     except Error as err:
-        return jsonify({
-            'success': False,
-            'message': f'更新消费项失败（MySQL错误）：{str(err)}',
-            'error': str(err)
-        }), 500
+        return jsonify({'success': False, 'message': f'MySQL错误：{str(err)}'}), 500
     except Exception as e:
-        return jsonify({
-            'success': False,
-            'message': f'更新消费项失败：{str(e)}',
-            'error': str(e)
-        }), 500
+        return jsonify({'success': False, 'message': str(e)}), 500
 
-# ------------------- 接口4：删除消费项（前端点击删除按钮调用）-------------------
 @app.route('/api/consumption/<int:id>', methods=['DELETE'])
 def delete_consumption_api(id):
     try:
-        # 调用database.py中的删除函数
         delete_success = delete_consumption(id)
         if delete_success:
-            return jsonify({
-                'success': True,
-                'message': f'消费项（ID：{id}）删除成功！'
-            }), 200
+            return jsonify({'success': True, 'message': f'删除成功！'}), 200
         else:
-            return jsonify({
-                'success': False,
-                'message': f'消费项（ID：{id}）不存在或删除失败！'
-            }), 404
+            return jsonify({'success': False, 'message': '消费项不存在！'}), 404
     except Error as err:
-        return jsonify({
-            'success': False,
-            'message': f'删除消费项失败（MySQL错误）：{str(err)}',
-            'error': str(err)
-        }), 500
+        return jsonify({'success': False, 'message': f'MySQL错误：{str(err)}'}), 500
     except Exception as e:
-        return jsonify({
-            'success': False,
-            'message': f'删除消费项失败：{str(e)}',
-            'error': str(e)
-        }), 500
+        return jsonify({'success': False, 'message': str(e)}), 500
 
-# ------------------- 接口5：查询待收货消费项（前端待收货专区调用）-------------------
 @app.route('/api/consumption/pending', methods=['GET'])
 def get_pending_consumption():
     try:
         connection = get_db_connection()
         if not connection:
-            return jsonify({'success': False, 'message': '数据库连接失败，无法查询待收货数据！'}), 500
+            return jsonify({'success': False, 'message': '数据库连接失败！'}), 500
 
         cursor = connection.cursor()
         cursor.execute(
@@ -266,32 +444,22 @@ def get_pending_consumption():
         return jsonify({
             'success': True,
             'data': pending_list,
-            'count': len(pending_list)  # 同时返回待收货数量
+            'count': len(pending_list)
         }), 200
 
     except Error as err:
-        return jsonify({
-            'success': False,
-            'message': f'查询待收货数据失败（MySQL错误）：{str(err)}',
-            'error': str(err)
-        }), 500
+        return jsonify({'success': False, 'message': f'MySQL错误：{str(err)}'}), 500
     except Exception as e:
-        return jsonify({
-            'success': False,
-            'message': f'查询待收货数据失败：{str(e)}',
-            'error': str(e)
-        }), 500
+        return jsonify({'success': False, 'message': str(e)}), 500
 
-# ------------------- 接口6：按细分类型查询历史价格（前端价格查询功能调用）-------------------
 @app.route('/api/consumption/type/<sub_type>', methods=['GET'])
 def get_price_by_subtype(sub_type):
     try:
         connection = get_db_connection()
         if not connection:
-            return jsonify({'success': False, 'message': '数据库连接失败，无法查询价格数据！'}), 500
+            return jsonify({'success': False, 'message': '数据库连接失败！'}), 500
 
         cursor = connection.cursor()
-        # 筛选条件：同一细分类型+已收货+近30天（贴合实际价格查询需求）
         thirty_days_ago = (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
         query_sql = '''
         SELECT * FROM consumption 
@@ -310,23 +478,13 @@ def get_price_by_subtype(sub_type):
         }), 200
 
     except Error as err:
-        return jsonify({
-            'success': False,
-            'message': f'查询价格数据失败（MySQL错误）：{str(err)}',
-            'error': str(err)
-        }), 500
+        return jsonify({'success': False, 'message': f'MySQL错误：{str(err)}'}), 500
     except Exception as e:
-        return jsonify({
-            'success': False,
-            'message': f'查询价格数据失败：{str(e)}',
-            'error': str(e)
-        }), 500
+        return jsonify({'success': False, 'message': str(e)}), 500
 
-# ------------------- 接口7：查询回购/踩雷清单（前端清单功能调用）-------------------
 @app.route('/api/consumption/tag/<tag>', methods=['GET'])
 def get_tag_list(tag):
     try:
-        # 调用database.py中的查询函数
         tag_list = get_tagged_consumption(tag)
         return jsonify({
             'success': True,
@@ -334,38 +492,37 @@ def get_tag_list(tag):
             'count': len(tag_list)
         }), 200
     except Error as err:
-        return jsonify({
-            'success': False,
-            'message': f'查询{tag}清单失败（MySQL错误）：{str(err)}',
-            'error': str(err)
-        }), 500
+        return jsonify({'success': False, 'message': f'MySQL错误：{str(err)}'}), 500
     except Exception as e:
-        return jsonify({
-            'success': False,
-            'message': f'查询{tag}清单失败：{str(e)}',
-            'error': str(e)
-        }), 500
-    # app.py 顶部新增导入
-from flask import render_template
+        return jsonify({'success': False, 'message': str(e)}), 500
 
-# 补充页面渲染路由
+# ------------------- 页面路由改造 -------------------
 @app.route('/')
 def index():
-    """首页（新增消费项）"""
+    """首页：改为饼图统计页面"""
     pending_count = get_pending_count()
-    return render_template('index.html', pending_count=pending_count)
+    # 获取当月1号作为默认开始时间
+    today = datetime.now()
+    default_start = today.replace(day=1).strftime('%Y-%m-%d')
+    default_end = get_current_date()
+    return render_template('index.html', 
+                           pending_count=pending_count,
+                           default_start=default_start,
+                           default_end=default_end)
 
 @app.route('/list')
 def consumption_list():
-    """消费列表页"""
-    connection = get_db_connection()
-    cursor = connection.cursor()
-    cursor.execute('SELECT * FROM consumption ORDER BY create_time DESC')
-    consumption_list = cursor.fetchall()
-    cursor.close()
-    connection.close()
+    """消费列表页：新增新增按钮+批量添加弹窗"""
     pending_count = get_pending_count()
-    return render_template('list.html', consumption_list=consumption_list, pending_count=pending_count)
+    # 获取下拉框选项
+    channels = get_all_channels()
+    main_types = get_all_main_types()
+    sub_types = get_all_sub_types()
+    return render_template('list.html', 
+                           pending_count=pending_count,
+                           channels=channels,
+                           main_types=main_types,
+                           sub_types=sub_types)
 
 @app.route('/pending')
 def pending_list():
@@ -386,9 +543,22 @@ def price_query():
     pending_count = get_pending_count()
     return render_template('price.html', sub_types=sub_types, pending_count=pending_count)
 
-# ------------------- 启动Flask服务（项目入口）-------------------
+@app.route('/manage')
+def manage_page():
+    """新增管理页面"""
+    pending_count = get_pending_count()
+    # 获取所有管理数据
+    channels = get_all_channels()
+    main_types = get_all_main_types()
+    sub_types = get_all_sub_types()
+    return render_template('manage.html', 
+                           pending_count=pending_count,
+                           channels=channels,
+                           main_types=main_types,
+                           sub_types=sub_types)
+
+# ------------------- 启动服务 -------------------
 if __name__ == '__main__':
     print(f"🚀 Flask后端服务启动中... 端口：{PORT}")
-    print(f"📌 前端可通过 http://localhost:{PORT} 调用接口")
-    # 启动服务（debug=True：开发模式，修改代码自动重启，生产环境可改为False）
+    print(f"📌 前端可通过 http://localhost:{PORT} 访问")
     app.run(host='0.0.0.0', port=PORT, debug=True)
