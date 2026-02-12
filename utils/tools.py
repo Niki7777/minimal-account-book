@@ -45,13 +45,35 @@ def calculate_daily_average_price(total_price: float, start_use_time: str, end_u
         return 0.0
 
 def get_current_date() -> str:
-    """获取当前日期（格式：YYYY-MM-DD，用于购买时间自动填充）"""
-    return datetime.now().strftime('%Y-%m-%d')
+    """获取当前日期时间（格式：YYYY-MM-DD HH:MM:SS，用于购买时间自动填充）"""
+    return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
 def validate_date_format(date_str: str) -> bool:
-    """验证日期格式是否为YYYY-MM-DD（辅助函数，避免前端传入错误格式）"""
+    """验证日期格式是否为YYYY-MM-DD或YYYY-MM-DD HH:MM:SS（辅助函数，避免前端传入错误格式）"""
     try:
-        datetime.strptime(date_str, '%Y-%m-%d')
+        # 尝试解析带时间的格式
+        datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
         return True
     except ValueError:
-        return False
+        try:
+            # 尝试解析仅日期的格式
+            datetime.strptime(date_str, '%Y-%m-%d')
+            return True
+        except ValueError:
+            return False
+
+def format_date_display(date_str: str) -> str:
+    """格式化日期为显示格式：yyyy年mm月dd日 hh:mm:ss"""
+    if not date_str:
+        return ''
+    try:
+        # 尝试解析带时间的格式
+        dt = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
+        return dt.strftime('%Y年%m月%d日 %H:%M:%S')
+    except ValueError:
+        try:
+            # 尝试解析仅日期的格式
+            dt = datetime.strptime(date_str, '%Y-%m-%d')
+            return dt.strftime('%Y年%m月%d日 00:00:00')
+        except ValueError:
+            return date_str

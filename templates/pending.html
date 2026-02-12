@@ -3,210 +3,359 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>极简记账本 - 待收货专区</title>
-    <style>
-        /* 全局通用样式 */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: "Microsoft YaHei", sans-serif;
-        }
-
-        /* 导航栏样式 */
-        .navbar {
-            background-color: #2c3e50;
-            color: white;
-            padding: 16px 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .navbar-title {
-            font-size: 20px;
-            font-weight: bold;
-        }
-
-        .navbar-menu {
-            display: flex;
-            gap: 24px;
-        }
-
-        .navbar-menu a {
-            color: white;
-            text-decoration: none;
-            font-size: 16px;
-            padding: 8px 12px;
-            border-radius: 4px;
-            transition: background-color 0.3s;
-        }
-
-        .navbar-menu a:hover {
-            background-color: #34495e;
-        }
-
-        .navbar-menu a.active {
-            background-color: #1abc9c;
-        }
-
-        /* 待收货数量提示 */
-        .pending-count {
-            background-color: #e74c3c;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 14px;
-            margin-left: 8px;
-        }
-
-        /* 容器样式 */
-        .container {
-            max-width: 1200px;
-            margin: 32px auto;
-            padding: 0 24px;
-        }
-
-        /* 页面标题 */
-        .page-title {
-            font-size: 24px;
-            color: #2c3e50;
-            margin-bottom: 24px;
-            padding-bottom: 12px;
-            border-bottom: 2px solid #1abc9c;
-        }
-
-        /* 表格样式 */
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .data-table th, .data-table td {
-            padding: 16px;
-            text-align: left;
-            border-bottom: 1px solid #ecf0f1;
-        }
-
-        .data-table th {
-            background-color: #f8f9fa;
-            color: #2c3e50;
-            font-weight: 600;
-        }
-
-        .data-table tr:hover {
-            background-color: #f8f9fa;
-        }
-
-        /* 空数据提示 */
-        .empty-tip {
-            text-align: center;
-            padding: 64px 0;
-            color: #7f8c8d;
-            font-size: 18px;
-        }
-
-        /* 操作按钮样式 */
-        .btn {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-
-        .btn-success {
-            background-color: #1abc9c;
-            color: white;
-        }
-
-        .btn-success:hover {
-            background-color: #16a085;
-        }
-
-        .btn-danger {
-            background-color: #e74c3c;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background-color: #c0392b;
-        }
-
-        /* 响应式适配 */
-        @media (max-width: 768px) {
-            .navbar-menu {
-                gap: 12px;
+    <title>待收货 - 极简记账本</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#64748b',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        danger: '#ef4444',
+                        info: '#06b6d4',
+                        light: '#f9fafb',
+                        dark: '#1e293b',
+                        'primary-light': '#dbeafe',
+                        'secondary-light': '#f1f5f9',
+                        'border-color': '#e2e8f0'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'Microsoft YaHei', 'sans-serif']
+                    },
+                    boxShadow: {
+                        'card': '0 2px 8px 0 rgba(0, 0, 0, 0.08)',
+                        'card-hover': '0 4px 16px 0 rgba(0, 0, 0, 0.12)',
+                        'modal': '0 8px 32px 0 rgba(0, 0, 0, 0.16)'
+                    }
+                }
             }
-
-            .data-table th, .data-table td {
-                padding: 12px 8px;
-                font-size: 14px;
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
             }
-
-            .page-title {
-                font-size: 20px;
+            .card {
+                @apply bg-white rounded-xl shadow-card transition-all duration-300;
+            }
+            .card:hover {
+                @apply shadow-card-hover transform -translate-y-1;
+            }
+            .btn {
+                @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+            }
+            .btn-primary {
+                @apply bg-primary text-white hover:bg-primary/90 focus:ring-primary;
+            }
+            .btn-secondary {
+                @apply bg-secondary text-white hover:bg-secondary/90 focus:ring-secondary;
+            }
+            .btn-success {
+                @apply bg-success text-white hover:bg-success/90 focus:ring-success;
+            }
+            .btn-danger {
+                @apply bg-danger text-white hover:bg-danger/90 focus:ring-danger;
+            }
+            .btn-outline {
+                @apply border border-border-color text-secondary hover:bg-secondary-light focus:ring-primary;
+            }
+            .input {
+                @apply w-full px-4 py-2 border border-border-color rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
+            }
+            .select {
+                @apply w-full px-4 py-2 border border-border-color rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
+            }
+            .nav-item {
+                @apply flex flex-col items-center justify-center gap-1 px-4 py-3 transition-all duration-200 relative;
+            }
+            .nav-item.active {
+                @apply text-primary;
+            }
+            .nav-item.active::after {
+                @apply content-[''] absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-primary rounded-full;
+            }
+            .nav-item:hover {
+                @apply text-primary;
+            }
+            .nav-icon {
+                @apply text-xl;
+            }
+            .nav-label {
+                @apply text-xs font-medium;
+            }
+            .table-hover {
+                @apply hover:bg-gray-50 transition-colors;
+            }
+            .btn-sm {
+                @apply px-3 py-1 text-sm;
+            }
+            /* 确保表格单元格内容水平排列 */
+            #pendingTable td {
+                white-space: nowrap;
+                vertical-align: middle;
+            }
+            /* 确保操作按钮水平排列 */
+            #pendingTable td .btn {
+                display: inline-block;
+                margin-right: 8px;
+            }
+            #pendingTable td .btn:last-child {
+                margin-right: 0;
             }
         }
     </style>
+    <style>
+        /* 全局样式 */
+        body {
+            font-family: 'Inter', 'Microsoft YaHei', sans-serif;
+        }
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
 </head>
-<body>
-    <!-- 导航栏（统一样式） -->
-    <nav class="navbar">
-        <div class="navbar-title">极简记账本</div>
-        <div class="navbar-menu">
-            <a href="/">统计首页</a>
-            <a href="/list">消费列表</a>
-            <a href="/pending" class="active">待收货 <span class="pending-count">{{ pending_count }}</span></a>
-            <a href="/price">价格查询</a>
-            <a href="/manage">管理页面</a>
+<body class="bg-light font-sans">
+    <!-- 主内容区 -->
+    <main class="flex-grow container mx-auto px-4 py-6 pb-20">
+        <div class="space-y-6">
+            <div class="flex justify-between items-center">
+                <h1 class="text-xl sm:text-2xl font-bold text-secondary">待收货</h1>
+            </div>
+
+        <!-- 待收货列表表格 - 桌面端 -->
+        <div class="card overflow-x-auto hidden md:block">
+            <table class="w-full border-collapse" id="pendingTable">
+                <thead>
+                    <tr class="bg-secondary-light">
+                        <th class="px-4 py-3 text-left text-sm font-medium text-secondary border-b border-border-color whitespace-nowrap">消费内容</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-secondary border-b border-border-color whitespace-nowrap">总价</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-secondary border-b border-border-color whitespace-nowrap">购买渠道</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-secondary border-b border-border-color whitespace-nowrap">购买日期</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-secondary border-b border-border-color whitespace-nowrap">取件码</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-secondary border-b border-border-color whitespace-nowrap">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if pending_list %}
+                        {% for item in pending_list %}
+                        <tr data-id="{{ item.id }}" class="table-hover">
+                            <td class="px-4 py-3 text-sm border-b whitespace-nowrap">{{ item.content }}</td>
+                            <td class="px-4 py-3 text-sm font-medium text-secondary border-b whitespace-nowrap">¥{{ item.total_price }}</td>
+                            <td class="px-4 py-3 text-sm border-b whitespace-nowrap">{{ item.channel }}</td>
+                            <td class="px-4 py-3 text-sm border-b whitespace-nowrap create-time">{{ item.create_time }}</td>
+                            <td class="px-4 py-3 text-sm border-b whitespace-nowrap">{{ item.pickup_code or '-' }}</td>
+                            <td class="px-4 py-3 text-sm border-b whitespace-nowrap">
+                                <div class="flex items-center gap-2">
+                                    <button class="btn btn-primary btn-sm" onclick="addPickupCode({{ item.id }})">添加取件码</button>
+                                    <button class="btn btn-success btn-sm" onclick="confirmReceive({{ item.id }})">确认收货</button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="py-16 text-center text-gray-500 text-lg">
+                                暂无待收货消费项 🎉
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
         </div>
-    </nav>
+        
+        <!-- 待收货列表卡片 - 移动端 -->
+        <div class="space-y-4 md:hidden">
+            {% if pending_list %}
+                {% for item in pending_list %}
+                <div class="card p-4" data-id="{{ item.id }}">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <h3 class="font-medium text-secondary mb-1">{{ item.content }}</h3>
+                            <p class="text-sm text-gray-500">ID: {{ item.id }}</p>
+                        </div>
+                        <span class="px-2 py-1 text-xs rounded bg-warning/10 text-warning">
+                            待收货
+                        </span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 mb-3">
+                        <div class="text-sm">
+                            <span class="text-gray-500">总价:</span> <span class="font-medium text-secondary">¥{{ item.total_price }}</span>
+                        </div>
+                        <div class="text-sm">
+                            <span class="text-gray-500">购买渠道:</span> {{ item.channel }}
+                        </div>
+                        <div class="text-sm">
+                            <span class="text-gray-500">购买日期:</span> {{ item.create_time }}
+                        </div>
+                        <div class="text-sm">
+                            <span class="text-gray-500">取件码:</span> {{ item.pickup_code or '-' }}
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="flex-1 py-2 text-sm btn btn-primary" onclick="addPickupCode({{ item.id }})">添加取件码</button>
+                        <button class="flex-1 py-2 text-sm btn btn-success" onclick="confirmReceive({{ item.id }})">确认收货</button>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="card p-10 text-center text-gray-500">
+                    <i class="fa fa-box text-3xl mb-3"></i>
+                    <p>暂无待收货消费项 🎉</p>
+                </div>
+            {% endif %}
+        </div>
+        </div>
+    </main>
 
-    <!-- 主容器 -->
-    <div class="container">
-        <h1 class="page-title">待收货消费项</h1>
-
-        <!-- 待收货列表表格 -->
-        <table class="data-table" id="pendingTable">
-            <thead>
-                <tr>
-                    <th>消费内容</th>
-                    <th>总价</th>
-                    <th>购买渠道</th>
-                    <th>购买日期</th>
-                    <th>操作</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% if pending_list %}
-                    {% for item in pending_list %}
-                    <tr data-id="{{ item.id }}">
-                        <td>{{ item.content }}</td>
-                        <td>¥{{ item.total_price }}</td>
-                        <td>{{ item.channel }}</td>
-                        <td>{{ item.create_time }}</td>
-                        <td>
-                            <button class="btn btn-success" onclick="confirmReceive({{ item.id }})">确认收货</button>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                {% else %}
-                    <tr>
-                        <td colspan="5" class="empty-tip">暂无待收货消费项 🎉</td>
-                    </tr>
-                {% endif %}
-            </tbody>
-        </table>
+    <!-- 取件码输入弹窗 -->
+    <div id="pickupCodeModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">添加取件码</h3>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">取件码</label>
+                <input type="text" id="pickupCodeInput" class="input" placeholder="请输入取件码" maxlength="50">
+            </div>
+            <div class="flex justify-end gap-3 mt-6">
+                <button id="cancelPickupCode" class="btn btn-secondary" onclick="closePickupCodeModal()">取消</button>
+                <button id="submitPickupCode" class="btn btn-primary" onclick="submitPickupCode()">确认</button>
+            </div>
+        </div>
     </div>
+
+    <!-- 底部导航栏 -->
+    <footer class="fixed bottom-0 left-0 right-0 bg-white shadow-md z-40">
+        <div class="flex justify-around items-center h-16">
+            <a href="/" class="nav-item">
+                <i class="fa fa-home nav-icon"></i>
+                <span class="nav-label">首页</span>
+            </a>
+            <a href="/list" class="nav-item">
+                <i class="fa fa-plus-circle nav-icon"></i>
+                <span class="nav-label">记账</span>
+            </a>
+            <a href="/pending" class="nav-item active">
+                <i class="fa fa-truck nav-icon"></i>
+                <span class="nav-label">待收货</span>
+                {% if pending_count > 0 %}
+                <span class="absolute -top-1 -right-1 bg-danger text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                    {{ pending_count }}
+                </span>
+                {% endif %}
+            </a>
+            <a href="/price" class="nav-item">
+                <i class="fa fa-bar-chart nav-icon"></i>
+                <span class="nav-label">统计</span>
+            </a>
+            <a href="/manage" class="nav-item">
+                <i class="fa fa-cog nav-icon"></i>
+                <span class="nav-label">设置</span>
+            </a>
+        </div>
+    </footer>
 
     <!-- 脚本：确认收货逻辑 -->
     <script>
+        // 全局变量存储当前操作的ID
+        let currentPickupCodeId = null;
+
+        // 格式化日期显示
+        function formatDateDisplay(dateStr) {
+            if (!dateStr) return '';
+            try {
+                // 尝试解析带时间的格式
+                const dt = new Date(dateStr);
+                const year = dt.getFullYear();
+                const month = String(dt.getMonth() + 1).padStart(2, '0');
+                const day = String(dt.getDate()).padStart(2, '0');
+                const hours = String(dt.getHours()).padStart(2, '0');
+                const minutes = String(dt.getMinutes()).padStart(2, '0');
+                const seconds = String(dt.getSeconds()).padStart(2, '0');
+                return `${year}年${month}月${day}日 ${hours}:${minutes}:${seconds}`;
+            } catch (error) {
+                return dateStr;
+            }
+        }
+
+        // 页面加载时格式化日期
+        document.addEventListener('DOMContentLoaded', function() {
+            const dateElements = document.querySelectorAll('.create-time');
+            dateElements.forEach(element => {
+                const originalDate = element.textContent;
+                element.textContent = formatDateDisplay(originalDate);
+            });
+        });
+
+        // 打开取件码输入弹窗
+        function addPickupCode(id) {
+            currentPickupCodeId = id;
+            document.getElementById('pickupCodeInput').value = '';
+            document.getElementById('pickupCodeModal').classList.remove('hidden');
+        }
+
+        // 关闭取件码输入弹窗
+        function closePickupCodeModal() {
+            currentPickupCodeId = null;
+            document.getElementById('pickupCodeModal').classList.add('hidden');
+        }
+
+        // 提交取件码
+        function submitPickupCode() {
+            if (!currentPickupCodeId) {
+                closePickupCodeModal();
+                return;
+            }
+
+            const pickupCode = document.getElementById('pickupCodeInput').value.trim();
+            if (!pickupCode) {
+                alert('请输入取件码');
+                return;
+            }
+
+            // 调用更新接口
+            fetch(`/api/consumption/${currentPickupCodeId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ pickupCode: pickupCode })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('取件码添加成功！');
+                    // 刷新页面
+                    window.location.reload();
+                } else {
+                    alert('更新失败：' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('添加取件码失败：', error);
+                alert('网络错误，请重试！');
+            })
+            .finally(() => {
+                closePickupCodeModal();
+            });
+        }
+
         // 确认收货
         function confirmReceive(id) {
             if (!confirm('确定要标记为「已收货」吗？')) {

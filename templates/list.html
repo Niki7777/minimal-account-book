@@ -2,473 +2,793 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>消费列表 - 极简记账本</title>
-    <style>
-        /* 全局通用样式 */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: "Microsoft YaHei", sans-serif;
-        }
-
-        /* 导航栏样式 */
-        .navbar {
-            background-color: #2c3e50;
-            color: white;
-            padding: 16px 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .navbar-title {
-            font-size: 20px;
-            font-weight: bold;
-        }
-
-        .navbar-menu {
-            display: flex;
-            gap: 24px;
-        }
-
-        .navbar-menu a {
-            color: white;
-            text-decoration: none;
-            font-size: 16px;
-            padding: 8px 12px;
-            border-radius: 4px;
-            transition: background-color 0.3s;
-        }
-
-        .navbar-menu a:hover {
-            background-color: #34495e;
-        }
-
-        .navbar-menu a.active {
-            background-color: #1abc9c;
-        }
-
-        /* 待收货数量提示 */
-        .pending-count {
-            background-color: #e74c3c;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 14px;
-            margin-left: 8px;
-        }
-
-        /* 容器样式 */
-        .container {
-            max-width: 1200px;
-            margin: 32px auto;
-            padding: 0 24px;
-        }
-
-        /* 页面标题 */
-        .page-title {
-            font-size: 24px;
-            color: #2c3e50;
-            margin-bottom: 24px;
-            padding-bottom: 12px;
-            border-bottom: 2px solid #1abc9c;
-        }
-
-        /* 按钮通用样式 */
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: all 0.3s;
-            background-color: #1abc9c;
-            color: white;
-            margin: 10px 8px 10px 0;
-        }
-
-        .btn:hover {
-            background-color: #16a085;
-        }
-
-        /* 弹窗样式 */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); z-index: 999;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content {
-            width: 90%;
-            max-width: 600px;
-            background: white;
-            padding: 24px;
-            border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            position: relative;
-        }
-
-        .modal-content h3 {
-            color: #2c3e50;
-            margin-bottom: 20px;
-            font-size: 18px;
-        }
-
-        .modal-content span[onclick] {
-            position: absolute;
-            top: 16px;
-            right: 20px;
-            cursor: pointer;
-            font-size: 20px;
-            color: #7f8c8d;
-            transition: color 0.3s;
-        }
-
-        .modal-content span[onclick]:hover {
-            color: #e74c3c;
-        }
-
-        /* 表单项样式 */
-        .form-item {
-            margin: 16px 0;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .form-item label {
-            font-size: 16px;
-            color: #2c3e50;
-            font-weight: 500;
-            width: 100px;
-        }
-
-        .form-item input, .form-item select {
-            flex: 1;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-
-        .form-item input:focus, .form-item select:focus {
-            border-color: #1abc9c;
-        }
-
-        /* 表格通用样式 */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-            border-radius: 8px;
-            overflow: hidden;
-            margin: 16px 0;
-        }
-
-        th, td {
-            padding: 16px;
-            text-align: left;
-            border-bottom: 1px solid #ecf0f1;
-        }
-
-        th {
-            background-color: #f8f9fa;
-            color: #2c3e50;
-            font-weight: 600;
-        }
-
-        tr:hover {
-            background-color: #f8f9fa;
-        }
-
-        /* 操作按钮样式 */
-        .action-btn {
-            padding: 8px 16px;
-            margin: 0 4px;
-            cursor: pointer;
-            border: none;
-            border-radius: 4px;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-
-        .action-btn[style*="background: #ffc107"] {
-            background-color: #ffc107;
-            color: #2c3e50;
-        }
-
-        .action-btn[style*="background: #ffc107"]:hover {
-            background-color: #e0a800;
-        }
-
-        .action-btn[style*="background: #dc3545"] {
-            background-color: #e74c3c;
-            color: white;
-        }
-
-        .action-btn[style*="background: #dc3545"]:hover {
-            background-color: #c0392b;
-        }
-
-        /* 批量新增相关 */
-        .add-more {
-            color: #1abc9c;
-            cursor: pointer;
-            margin: 16px 0;
-            font-size: 16px;
-            transition: color 0.3s;
-        }
-
-        .add-more:hover {
-            color: #16a085;
-        }
-
-        .batch-item {
-            border: 1px solid #ecf0f1;
-            padding: 16px;
-            margin: 16px 0;
-            border-radius: 8px;
-            background-color: #f8f9fa;
-        }
-
-        /* 响应式适配 */
-        @media (max-width: 768px) {
-            .navbar-menu {
-                gap: 12px;
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>记账 - 极简记账本</title>
+    <!-- Tailwind CSS v3 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- Flatpickr (现代化日期选择器) -->
+    <link href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/zh.js"></script>
+    <!-- Tailwind 配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#64748b',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        danger: '#ef4444',
+                        info: '#06b6d4',
+                        light: '#f9fafb',
+                        dark: '#1e293b',
+                        'primary-light': '#dbeafe',
+                        'secondary-light': '#f1f5f9',
+                        'border-color': '#e2e8f0'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'Microsoft YaHei', 'sans-serif']
+                    },
+                    boxShadow: {
+                        'card': '0 2px 8px 0 rgba(0, 0, 0, 0.08)',
+                        'card-hover': '0 4px 16px 0 rgba(0, 0, 0, 0.12)',
+                        'modal': '0 8px 32px 0 rgba(0, 0, 0, 0.16)'
+                    }
+                }
             }
-
-            .form-item {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 8px;
+        }
+    </script>
+    <!-- 自定义工具类 -->
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
             }
-
-            .form-item label {
-                width: 100%;
+            .card {
+                @apply bg-white rounded-xl shadow-card transition-all duration-300;
             }
-
-            .form-item input, .form-item select {
-                width: 100%;
+            .card:hover {
+                @apply shadow-card-hover transform -translate-y-1;
             }
-
-            th, td {
-                padding: 12px 8px;
-                font-size: 14px;
+            .btn {
+                @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
             }
-
-            .page-title {
-                font-size: 20px;
+            .btn-primary {
+                @apply bg-primary text-white hover:bg-primary/90 focus:ring-primary;
+            }
+            .btn-secondary {
+                @apply bg-secondary text-white hover:bg-secondary/90 focus:ring-secondary;
+            }
+            .btn-success {
+                @apply bg-success text-white hover:bg-success/90 focus:ring-success;
+            }
+            .btn-danger {
+                @apply bg-danger text-white hover:bg-danger/90 focus:ring-danger;
+            }
+            .btn-outline {
+                @apply border border-border-color text-secondary hover:bg-secondary-light focus:ring-primary;
+            }
+            .input {
+                @apply w-full px-4 py-2 border border-border-color rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
+            }
+            .select {
+                @apply w-full px-4 py-2 border border-border-color rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
+            }
+            .nav-item {
+                @apply flex flex-col items-center justify-center gap-1 px-4 py-3 transition-all duration-200 relative;
+            }
+            .nav-item.active {
+                @apply text-primary;
+            }
+            .nav-item.active::after {
+                @apply content-[''] absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-primary rounded-full;
+            }
+            .nav-item:hover {
+                @apply text-primary;
+            }
+            .nav-icon {
+                @apply text-xl;
+            }
+            .nav-label {
+                @apply text-xs font-medium;
             }
         }
     </style>
+    <style>
+        /* 全局样式 */
+        body {
+            font-family: 'Inter', 'Microsoft YaHei', sans-serif;
+        }
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        /* 日期选择器样式 */
+        .flatpickr-day.selected {
+            background-color: #3b82f6 !important;
+            border-color: #3b82f6 !important;
+        }
+        .flatpickr-day:hover {
+            background-color: #dbeafe !important;
+        }
+        
+        /* 固定列和滚动列样式 */
+        #fixedColumns tr,
+        #scrollableColumns tr {
+            height: 48px;
+            white-space: nowrap;
+        }
+        
+        #fixedColumns td,
+        #scrollableColumns td {
+            vertical-align: middle;
+        }
+        
+        /* 确保操作按钮水平排列 */
+        #scrollableColumns td .flex {
+            align-items: center;
+        }
+        
+        #scrollableColumns td .btn {
+            white-space: nowrap;
+        }
+    </style>
 </head>
-<body>
-    <!-- 导航栏 -->
-    <nav class="navbar">
-        <div class="navbar-title">极简记账本</div>
-        <div class="navbar-menu">
-            <a href="/">统计首页</a>
-            <a href="/list" class="active">消费列表</a>
-            <a href="/pending">待收货 <span class="pending-count">{{ pending_count }}</span></a>
-            <a href="/price">价格查询</a>
-            <a href="/manage">管理页面</a>
-        </div>
-    </nav>
-
-    <!-- 主容器 -->
-    <div class="container">
-        <h1 class="page-title">消费列表管理</h1>
-
-        <button class="btn" onclick="openAddModal()">新增消费项</button>
-        <button class="btn" onclick="openBatchModal()">批量新增</button>
-
-        <!-- 单条新增弹窗 -->
-        <div class="modal" id="addModal">
-            <div class="modal-content">
-                <span onclick="closeAddModal()">&times;</span>
-                <h3>新增消费项</h3>
-                <div class="form-item">
-                    <label>消费内容：</label>
-                    <input type="text" id="content" placeholder="请输入消费内容">
+<body class="bg-light font-sans">
+    <!-- 主内容区 -->
+    <main class="flex-grow container mx-auto px-4 py-6 pb-20">
+        <div class="space-y-6">
+            <div class="flex justify-between items-center">
+                <h1 class="text-xl sm:text-2xl font-bold text-secondary">记账</h1>
+                <div class="flex gap-3">
+                    <button class="btn btn-primary" onclick="openAddModal()">
+                        <i class="fa fa-plus mr-1"></i>记一笔
+                    </button>
+                    <button class="btn btn-outline" onclick="openBatchModal()">
+                        <i class="fa fa-files-o mr-1"></i>批量
+                    </button>
                 </div>
-                <div class="form-item">
-                    <label>数量：</label>
-                    <input type="number" id="quantity" value="1" step="0.1">
+            </div>
+            
+            <!-- 时间范围查询 -->
+            <div class="card p-4">
+                <div class="flex flex-wrap gap-4 items-center">
+                    <div class="flex flex-col gap-1 flex-1 min-w-[200px]">
+                        <label class="text-sm font-medium text-secondary">开始日期</label>
+                        <div class="relative">
+                            <input 
+                                id="startDate"
+                                type="text" 
+                                class="input pr-10" 
+                                placeholder="选择开始日期"
+                            >
+                            <i class="fa fa-calendar absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-1 flex-1 min-w-[200px]">
+                        <label class="text-sm font-medium text-secondary">结束日期</label>
+                        <div class="relative">
+                            <input 
+                                id="endDate"
+                                type="text" 
+                                class="input pr-10" 
+                                placeholder="选择结束日期"
+                            >
+                            <i class="fa fa-calendar absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-end gap-2">
+                        <button onclick="loadConsumptionList()" class="btn btn-primary">
+                            <i class="fa fa-search mr-1"></i>查询
+                        </button>
+                        <button onclick="resetDateRange()" class="btn btn-outline">
+                            <i class="fa fa-refresh mr-1"></i>重置
+                        </button>
+                    </div>
                 </div>
-                <div class="form-item">
-                    <label>总价：</label>
-                    <input type="number" id="totalPrice" value="0" step="0.01">
+            </div>
+            
+            <!-- 消费列表表格 - 桌面端 -->
+            <div class="card overflow-hidden hidden md:block">
+                <div class="overflow-x-auto relative">
+                    <!-- 固定列的容器 -->
+                    <div class="absolute left-0 top-0 bottom-0 bg-white z-10 shadow-md">
+                        <table class="w-auto">
+                            <thead class="bg-secondary-light">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-sm font-medium text-secondary border-r border-border-color w-16">ID</th>
+                                    <th class="px-4 py-3 text-left text-sm font-medium text-secondary border-r border-border-color w-32">消费内容</th>
+                                </tr>
+                            </thead>
+                            <tbody id="fixedColumns">
+                                <!-- 动态加载固定列数据 -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- 可滚动列的容器 -->
+                    <div class="ml-[12rem] min-w-[calc(100%-12rem)]">
+                        <table class="w-full">
+                            <thead class="bg-secondary-light">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-sm font-medium text-secondary">数量</th>
+                                    <th class="px-4 py-3 text-left text-sm font-medium text-secondary">总价</th>
+                                    <th class="px-4 py-3 text-left text-sm font-medium text-secondary">购买渠道</th>
+                                    <th class="px-4 py-3 text-left text-sm font-medium text-secondary">账单类型</th>
+                                    <th class="px-4 py-3 text-left text-sm font-medium text-secondary">统计类型</th>
+                                    <th class="px-4 py-3 text-left text-sm font-medium text-secondary">收货状态</th>
+                                    <th class="px-4 py-3 text-left text-sm font-medium text-secondary">购买时间</th>
+                                    <th class="px-4 py-3 text-left text-sm font-medium text-secondary">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="scrollableColumns">
+                                <!-- 动态加载可滚动列数据 -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                <div class="form-item">
-                    <label>购买渠道：</label>
-                    <select id="channel">
-                        {% for ch in channels %}
-                        <option value="{{ ch.name }}">{{ ch.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="form-item">
-                    <label>账单大类：</label>
-                    <select id="mainType">
-                        {% for mt in main_types %}
-                        <option value="{{ mt.name }}">{{ mt.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="form-item">
-                    <label>细分类型：</label>
-                    <select id="subType">
-                        {% for st in sub_types %}
-                        <option value="{{ st.name }}">{{ st.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="form-item">
-                    <label>换算系数：</label>
-                    <input type="number" id="unitCoefficient" value="1" step="0.1">
-                </div>
-                <div class="form-item">
-                    <label>收货状态：</label>
-                    <select id="receiveStatus">
-                        <option value="已收货">已收货</option>
-                        <option value="待收货">待收货</option>
-                    </select>
-                </div>
-                <button class="btn" onclick="submitAdd()">提交</button>
+            </div>
+            
+            <!-- 消费列表卡片 - 移动端 -->
+            <div class="space-y-4 md:hidden" id="mobileConsumptionList">
+                <!-- 动态加载卡片数据 -->
             </div>
         </div>
+    </main>
 
-        <!-- 批量新增弹窗 -->
-        <div class="modal" id="batchModal">
-            <div class="modal-content">
-                <span onclick="closeBatchModal()">&times;</span>
-                <h3>批量新增消费项</h3>
-                <div id="batchFormContainer">
-                    <!-- 初始一行 -->
-                    <div class="batch-item">
-                        <div class="form-item">
-                            <label>消费内容：</label>
-                            <input type="text" class="batch-content" placeholder="请输入消费内容">
-                        </div>
-                        <div class="form-item">
-                            <label>数量：</label>
-                            <input type="number" class="batch-quantity" value="1" step="0.1">
-                        </div>
-                        <div class="form-item">
-                            <label>总价：</label>
-                            <input type="number" class="batch-totalPrice" value="0" step="0.01">
-                        </div>
-                        <div class="form-item">
-                            <label>购买渠道：</label>
-                            <select class="batch-channel">
-                                {% for ch in channels %}
-                                <option value="{{ ch.name }}">{{ ch.name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="form-item">
-                            <label>账单大类：</label>
-                            <select class="batch-mainType">
-                                {% for mt in main_types %}
-                                <option value="{{ mt.name }}">{{ mt.name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="form-item">
-                            <label>细分类型：</label>
-                            <select class="batch-subType">
-                                {% for st in sub_types %}
-                                <option value="{{ st.name }}">{{ st.name }}</option>
-                                {% endfor %}
-                            </select>
+    <!-- 底部导航栏 -->
+    <footer class="fixed bottom-0 left-0 right-0 bg-white shadow-md z-40">
+        <div class="flex justify-around items-center h-16">
+            <a href="/" class="nav-item">
+                <i class="fa fa-home nav-icon"></i>
+                <span class="nav-label">首页</span>
+            </a>
+            <a href="/list" class="nav-item active">
+                <i class="fa fa-plus-circle nav-icon"></i>
+                <span class="nav-label">记账</span>
+            </a>
+            <a href="/pending" class="nav-item">
+                <i class="fa fa-truck nav-icon"></i>
+                <span class="nav-label">待收货</span>
+                <span v-if="{{ pending_count }} > 0" class="absolute -top-1 -right-1 bg-danger text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                    {{ pending_count }}
+                </span>
+            </a>
+            <a href="/price" class="nav-item">
+                <i class="fa fa-bar-chart nav-icon"></i>
+                <span class="nav-label">统计</span>
+            </a>
+            <a href="/manage" class="nav-item">
+                <i class="fa fa-cog nav-icon"></i>
+                <span class="nav-label">设置</span>
+            </a>
+        </div>
+    </footer>
+
+    <!-- 单条新增弹窗 -->
+    <div id="addModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 hidden">
+        <div class="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-modal">
+            <div class="p-4 border-b flex justify-between items-center">
+                <h3 class="text-lg font-semibold text-secondary">新增消费项</h3>
+                <button onclick="closeAddModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <i class="fa fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-secondary mb-1">消费内容 *</label>
+                        <input type="text" id="content" placeholder="请输入消费内容" class="input">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-secondary mb-1">数量 *</label>
+                        <input type="number" id="quantity" value="1" step="0.1" class="input">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-secondary mb-1">总价 *</label>
+                        <input type="number" id="totalPrice" value="0" step="0.01" class="input">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-secondary mb-1">购买渠道 *</label>
+                        <select id="channel" class="select">
+                            {% for ch in channels %}
+                            <option value="{{ ch.name }}">{{ ch.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-secondary mb-1">账单类型 *</label>
+                        <select id="mainType" class="select">
+                            {% for mt in main_types %}
+                            <option value="{{ mt.name }}">{{ mt.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-secondary mb-1">统计类型（可选）</label>
+                        <select id="subType" class="select">
+                            <option value="">请选择（可选）</option>
+                            {% for st in sub_types %}
+                            <option value="{{ st.name }}">{{ st.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-secondary mb-1">换算系数</label>
+                        <input type="number" id="unitCoefficient" value="1" step="0.1" class="input">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-secondary mb-1">收货状态</label>
+                        <select id="receiveStatus" class="select">
+                            <option value="已收货">已收货</option>
+                            <option value="待收货">待收货</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-secondary mb-1">购买时间</label>
+                        <div class="relative">
+                            <input type="text" id="purchaseTime" placeholder="选择购买时间" class="input pr-10">
+                            <i class="fa fa-calendar absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                         </div>
                     </div>
                 </div>
-                <div class="add-more" onclick="addMoreBatchItem()">+ 新增一行</div>
-                <button class="btn" onclick="submitBatch()">批量提交</button>
+                <div class="flex justify-end space-x-3">
+                    <button onclick="closeAddModal()" class="btn btn-outline">
+                        取消
+                    </button>
+                    <button onclick="submitAdd()" class="btn btn-primary">
+                        提交
+                    </button>
+                </div>
             </div>
         </div>
+    </div>
 
-        <!-- 消费列表表格 -->
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>消费内容</th>
-                    <th>数量</th>
-                    <th>总价</th>
-                    <th>渠道</th>
-                    <th>大类</th>
-                    <th>细分类型</th>
-                    <th>收货状态</th>
-                    <th>创建时间</th>
-                    <th>操作</th>
-                </tr>
-            </thead>
-            <tbody id="consumptionTable">
-                <!-- 动态加载数据 -->
-            </tbody>
-        </table>
+    <!-- 使用消费项弹窗 -->
+    <div id="useModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 hidden">
+        <div class="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-modal">
+            <div class="p-4 border-b flex justify-between items-center">
+                <h3 class="text-lg font-semibold text-secondary">使用消费项</h3>
+                <button onclick="closeUseModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <i class="fa fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div id="useItemInfo" class="bg-secondary-light p-4 rounded-lg"></div>
+                <div id="useFormContainer" class="space-y-4">
+                    <div class="flex flex-wrap gap-4 items-center">
+                        <div class="flex-1 min-w-[200px]">
+                            <label class="block text-sm font-medium text-secondary mb-1">使用开始时间</label>
+                            <input type="text" class="use-start-time input" placeholder="选择开始时间">
+                        </div>
+                        <div class="flex-1 min-w-[200px]">
+                            <label class="block text-sm font-medium text-secondary mb-1">使用结束时间</label>
+                            <input type="text" class="use-end-time input" placeholder="选择结束时间">
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button onclick="addMoreUseItem()" class="btn btn-outline">
+                        <i class="fa fa-plus mr-1"></i>添加使用记录
+                    </button>
+                    <button onclick="submitUseItem()" class="btn btn-primary">
+                        提交使用记录
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 批量新增弹窗 -->
+    <div id="batchModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 hidden">
+        <div class="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-modal">
+            <div class="p-4 border-b flex justify-between items-center">
+                <h3 class="text-lg font-semibold text-secondary">批量新增消费项</h3>
+                <button onclick="closeBatchModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <i class="fa fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-6">
+                <div id="batchFormContainer">
+                    <!-- 初始一行 -->
+                    <div class="border border-border-color rounded-xl p-4 mb-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-secondary mb-1">消费内容 *</label>
+                                <input type="text" class="batch-content input" placeholder="请输入消费内容">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-secondary mb-1">数量 *</label>
+                                <input type="number" class="batch-quantity input" value="1" step="0.1">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-secondary mb-1">总价 *</label>
+                                <input type="number" class="batch-totalPrice input" value="0" step="0.01">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-secondary mb-1">购买渠道 *</label>
+                                <select class="batch-channel select">
+                                    {% for ch in channels %}
+                                    <option value="{{ ch.name }}">{{ ch.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-secondary mb-1">账单类型 *</label>
+                                <select class="batch-mainType select">
+                                    {% for mt in main_types %}
+                                    <option value="{{ mt.name }}">{{ mt.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-secondary mb-1">统计类型（可选）</label>
+                                <select class="batch-subType select">
+                                    {% for st in sub_types %}
+                                    <option value="{{ st.name }}">{{ st.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-secondary mb-1">换算系数</label>
+                                <input type="number" class="batch-unitCoefficient input" value="1" step="0.1">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="addMoreBatchItem()" class="btn btn-outline w-full">
+                    <i class="fa fa-plus mr-1"></i>添加更多消费项
+                </button>
+                <div class="flex justify-end space-x-3">
+                    <button onclick="closeBatchModal()" class="btn btn-outline">
+                        取消
+                    </button>
+                    <button onclick="submitBatch()" class="btn btn-primary">
+                        提交
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
+        // 初始化日期选择器
+        document.addEventListener('DOMContentLoaded', function() {
+            // 购买时间选择器
+            if (typeof flatpickr !== 'undefined') {
+                try {
+                    flatpickr('#purchaseTime', {
+                        locale: 'zh',
+                        dateFormat: 'Y-m-d H:i',
+                        enableTime: true
+                    });
+                    
+                    // 时间范围查询选择器
+                    flatpickr('#startDate', {
+                        locale: 'zh',
+                        dateFormat: 'Y-m-d',
+                        maxDate: 'today'
+                    });
+                    
+                    flatpickr('#endDate', {
+                        locale: 'zh',
+                        dateFormat: 'Y-m-d',
+                        maxDate: 'today'
+                    });
+                } catch (error) {
+                    console.error('初始化日期选择器失败:', error);
+                }
+            }
+            
+            // 设置默认时间范围为近一个月
+            setDefaultDateRange();
+            
+            // 页面加载时加载消费列表
+            loadConsumptionList();
+        });
+        
+        // 设置默认时间范围为近一个月
+        function setDefaultDateRange() {
+            const endDate = new Date();
+            const startDate = new Date();
+            startDate.setMonth(startDate.getMonth() - 1);
+            
+            // 格式化日期为 YYYY-MM-DD
+            const formatDate = (date) => {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            };
+            
+            document.getElementById('startDate').value = formatDate(startDate);
+            document.getElementById('endDate').value = formatDate(endDate);
+        }
+        
+        // 重置日期范围
+        function resetDateRange() {
+            setDefaultDateRange();
+            loadConsumptionList();
+        }
+
         // 加载消费列表
         function loadConsumptionList() {
-            fetch('/api/consumption')
-                .then(res => res.json())
+            console.log('开始加载消费列表...');
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            // 构建API请求URL
+            let url = '/api/consumption';
+            if (startDate && endDate) {
+                url += `?startDate=${startDate}&endDate=${endDate}`;
+            }
+            
+            fetch(url)
+                .then(res => {
+                    console.log('API响应状态:', res.status);
+                    if (!res.ok) {
+                        throw new Error('网络响应错误: ' + res.status);
+                    }
+                    return res.json().catch(jsonError => {
+                        console.error('解析JSON失败:', jsonError);
+                        throw new Error('服务器返回的数据格式错误');
+                    });
+                })
                 .then(data => {
+                    console.log('API响应数据:', data);
+                    
+                    // 检查数据格式
+                    if (typeof data !== 'object' || data === null) {
+                        throw new Error('服务器返回的数据格式错误');
+                    }
+                    
                     if (data.success) {
-                        const table = document.getElementById('consumptionTable');
-                        table.innerHTML = '';
-                        data.data.forEach(item => {
+                        const fixedColumns = document.getElementById('fixedColumns');
+                        const scrollableColumns = document.getElementById('scrollableColumns');
+                        const mobileList = document.getElementById('mobileConsumptionList');
+                        
+                        fixedColumns.innerHTML = '';
+                        scrollableColumns.innerHTML = '';
+                        mobileList.innerHTML = '';
+                        
+                        if (Array.isArray(data.data) && data.data.length > 0) {
+                            data.data.forEach(item => {
+                                try {
+                                    // 固定列数据（桌面端）
+                                    const fixedTr = document.createElement('tr');
+                                    fixedTr.className = 'border-b hover:bg-secondary-light/50 transition-colors h-12';
+                                    fixedTr.innerHTML = `
+                                        <td class="px-4 py-3 text-sm border-r border-border-color">${item.id || '-'}</td>
+                                        <td class="px-4 py-3 text-sm font-medium border-r border-border-color truncate">${item.content || '-'}</td>
+                                    `;
+                                    fixedColumns.appendChild(fixedTr);
+                                    
+                                    // 可滚动列数据（桌面端）
+                                    const scrollableTr = document.createElement('tr');
+                                    scrollableTr.className = 'border-b hover:bg-secondary-light/50 transition-colors h-12';
+                                    scrollableTr.innerHTML = `
+                                        <td class="px-4 py-3 text-sm">${item.quantity || '-'}</td>
+                                        <td class="px-4 py-3 text-sm font-medium text-secondary">¥${typeof item.total_price === 'number' ? item.total_price.toFixed(2) : (parseFloat(item.total_price) || 0).toFixed(2)}</td>
+                                        <td class="px-4 py-3 text-sm">${item.channel || '-'}</td>
+                                        <td class="px-4 py-3 text-sm">${item.main_type || '-'}</td>
+                                        <td class="px-4 py-3 text-sm">${item.sub_type || '-'}</td>
+                                        <td class="px-4 py-3 text-sm">
+                                            <span class="${item.receive_status === '已收货' ? 'text-success' : 'text-warning'}">
+                                                ${item.receive_status || '-'}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3 text-sm">${formatDateDisplay(item.create_time)}</td>
+                                        <td class="px-4 py-3 text-sm">
+                                            <div class="flex gap-2">
+                                                <button class="px-2 py-1 text-xs bg-warning/10 text-warning rounded hover:bg-warning/20 transition-colors" data-id="${item.id}" onclick="editItemById(${item.id})">
+                                                    <i class="fa fa-pencil mr-1"></i>编辑
+                                                </button>
+                                                <button class="px-2 py-1 text-xs bg-success/10 text-success rounded hover:bg-success/20 transition-colors" data-id="${item.id}" onclick="useItemById(${item.id})">
+                                                    <i class="fa fa-check mr-1"></i>使用
+                                                </button>
+                                                <button class="px-2 py-1 text-xs bg-danger/10 text-danger rounded hover:bg-danger/20 transition-colors" data-id="${item.id}" onclick="deleteItem(${item.id})">
+                                                    <i class="fa fa-trash mr-1"></i>删除
+                                                </button>
+                                            </div>
+                                        </td>
+                                    `;
+                                    scrollableColumns.appendChild(scrollableTr);
+                                    
+                                    // 移动端卡片数据
+                                    const card = document.createElement('div');
+                                    card.className = 'card p-4';
+                                    card.innerHTML = `
+                                        <div class="flex justify-between items-start mb-3">
+                                            <div>
+                                                <h3 class="font-medium text-secondary mb-1">${item.content || '-'}</h3>
+                                                <p class="text-sm text-gray-500">ID: ${item.id || '-'}</p>
+                                            </div>
+                                            <span class="px-2 py-1 text-xs rounded ${item.receive_status === '已收货' ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'}">
+                                                ${item.receive_status || '-'}
+                                            </span>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-2 mb-3">
+                                            <div class="text-sm">
+                                                <span class="text-gray-500">数量:</span> ${item.quantity || '-'}
+                                            </div>
+                                            <div class="text-sm">
+                                                <span class="text-gray-500">总价:</span> <span class="font-medium text-secondary">¥${typeof item.total_price === 'number' ? item.total_price.toFixed(2) : (parseFloat(item.total_price) || 0).toFixed(2)}</span>
+                                            </div>
+                                            <div class="text-sm">
+                                                <span class="text-gray-500">购买渠道:</span> ${item.channel || '-'}
+                                            </div>
+                                            <div class="text-sm">
+                                                <span class="text-gray-500">账单类型:</span> ${item.main_type || '-'}
+                                            </div>
+                                            <div class="text-sm">
+                                                <span class="text-gray-500">统计类型:</span> ${item.sub_type || '-'}
+                                            </div>
+                                            <div class="text-sm">
+                                                <span class="text-gray-500">购买时间:</span> ${formatDateDisplay(item.create_time).split(' ')[0]}
+                                            </div>
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <button class="flex-1 py-1.5 text-xs bg-warning/10 text-warning rounded hover:bg-warning/20 transition-colors" data-id="${item.id}" onclick="editItemById(${item.id})">
+                                                <i class="fa fa-pencil mr-1"></i>编辑
+                                            </button>
+                                            <button class="flex-1 py-1.5 text-xs bg-success/10 text-success rounded hover:bg-success/20 transition-colors" data-id="${item.id}" onclick="useItemById(${item.id})">
+                                                <i class="fa fa-check mr-1"></i>使用
+                                            </button>
+                                            <button class="flex-1 py-1.5 text-xs bg-danger/10 text-danger rounded hover:bg-danger/20 transition-colors" data-id="${item.id}" onclick="deleteItem(${item.id})">
+                                                <i class="fa fa-trash mr-1"></i>删除
+                                            </button>
+                                        </div>
+                                    `;
+                                    mobileList.appendChild(card);
+                                } catch (itemError) {
+                                    console.error('渲染消费项失败:', itemError, item);
+                                    // 跳过有问题的项，继续渲染其他项
+                                }
+                            });
+                        } else {
+                            console.log('没有消费数据');
+                            // 清空固定列和可滚动列
+                            fixedColumns.innerHTML = '';
+                            scrollableColumns.innerHTML = '';
+                            
+                            // 在可滚动列中显示空数据提示（桌面端）
                             const tr = document.createElement('tr');
                             tr.innerHTML = `
-                                <td>${item.id}</td>
-                                <td>${item.content}</td>
-                                <td>${item.quantity}</td>
-                                <td>${item.total_price}</td>
-                                <td>${item.channel}</td>
-                                <td>${item.main_type}</td>
-                                <td>${item.sub_type}</td>
-                                <td>${item.receive_status}</td>
-                                <td>${item.create_time}</td>
-                                <td>
-                                    <button class="action-btn" style="background: #ffc107;" onclick="editItem(${JSON.stringify(item).replace(/"/g, '&quot;')})">修改</button>
-                                    <button class="action-btn" style="background: #dc3545;" onclick="deleteItem(${item.id})">删除</button>
+                                <td colspan="8" class="px-4 py-10 text-center text-gray-500">
+                                    <i class="fa fa-inbox text-3xl mb-3"></i>
+                                    <p>暂无消费记录</p>
+                                    <p class="text-sm text-gray-400 mt-1">点击"记一笔"开始添加消费记录</p>
                                 </td>
                             `;
-                            table.appendChild(tr);
-                        });
+                            scrollableColumns.appendChild(tr);
+                            
+                            // 在移动端显示空数据提示
+                            mobileList.innerHTML = `
+                                <div class="card p-10 text-center text-gray-500">
+                                    <i class="fa fa-inbox text-3xl mb-3"></i>
+                                    <p>暂无消费记录</p>
+                                    <p class="text-sm text-gray-400 mt-1">点击"记一笔"开始添加消费记录</p>
+                                </div>
+                            `;
+                        }
                     } else {
-                        alert(data.message);
+                        console.error('API请求失败:', data.message);
+                        const errorMessage = data.message || '未知错误';
+                        
+                        // 清空固定列和可滚动列
+                        document.getElementById('fixedColumns').innerHTML = '';
+                        const scrollableColumns = document.getElementById('scrollableColumns');
+                        scrollableColumns.innerHTML = '';
+                        const mobileList = document.getElementById('mobileConsumptionList');
+                        mobileList.innerHTML = '';
+                        
+                        // 在可滚动列中显示错误提示（桌面端）
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td colspan="8" class="px-4 py-10 text-center text-gray-500">
+                                <i class="fa fa-exclamation-circle text-3xl mb-3"></i>
+                                <p>加载失败</p>
+                                <p class="text-sm text-gray-400 mt-1">${errorMessage}</p>
+                                <button onclick="loadConsumptionList()" class="mt-3 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+                                    重试
+                                </button>
+                            </td>
+                        `;
+                        scrollableColumns.appendChild(tr);
+                        
+                        // 在移动端显示错误提示
+                        mobileList.innerHTML = `
+                            <div class="card p-10 text-center text-gray-500">
+                                <i class="fa fa-exclamation-circle text-3xl mb-3"></i>
+                                <p>加载失败</p>
+                                <p class="text-sm text-gray-400 mt-1">${errorMessage}</p>
+                                <button onclick="loadConsumptionList()" class="mt-3 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+                                    重试
+                                </button>
+                            </div>
+                        `;
                     }
+                })
+                .catch(error => {
+                    console.error('加载消费列表失败:', error);
+                    
+                    // 清空固定列和可滚动列
+                    document.getElementById('fixedColumns').innerHTML = '';
+                    const scrollableColumns = document.getElementById('scrollableColumns');
+                    scrollableColumns.innerHTML = '';
+                    const mobileList = document.getElementById('mobileConsumptionList');
+                    mobileList.innerHTML = '';
+                    
+                    // 在可滚动列中显示错误提示（桌面端）
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td colspan="8" class="px-4 py-10 text-center text-gray-500">
+                            <i class="fa fa-exclamation-circle text-3xl mb-3"></i>
+                            <p>加载失败</p>
+                            <p class="text-sm text-gray-400 mt-1">${error.message || '网络错误，请重试'}</p>
+                            <button onclick="loadConsumptionList()" class="mt-3 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+                                重试
+                            </button>
+                        </td>
+                    `;
+                    scrollableColumns.appendChild(tr);
+                    
+                    // 在移动端显示错误提示
+                    mobileList.innerHTML = `
+                        <div class="card p-10 text-center text-gray-500">
+                            <i class="fa fa-exclamation-circle text-3xl mb-3"></i>
+                            <p>加载失败</p>
+                            <p class="text-sm text-gray-400 mt-1">${error.message || '网络错误，请重试'}</p>
+                            <button onclick="loadConsumptionList()" class="mt-3 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+                                重试
+                            </button>
+                        </div>
+                    `;
                 });
         }
 
         // 单条新增弹窗
         function openAddModal() {
-            document.getElementById('addModal').style.display = 'flex';
+            document.getElementById('addModal').classList.remove('hidden');
         }
         function closeAddModal() {
-            document.getElementById('addModal').style.display = 'none';
+            document.getElementById('addModal').classList.add('hidden');
         }
         function submitAdd() {
+            const subType = document.getElementById('subType').value;
+            const unitCoefficient = document.getElementById('unitCoefficient').value;
+            
+            // 验证：如果选择了统计类型，则换算系数必填
+            if (subType && !unitCoefficient) {
+                alert('选择统计类型后，换算系数为必填项！');
+                return;
+            }
+            
             const data = {
                 content: document.getElementById('content').value,
                 quantity: document.getElementById('quantity').value,
                 totalPrice: document.getElementById('totalPrice').value,
                 channel: document.getElementById('channel').value,
                 mainType: document.getElementById('mainType').value,
-                subType: document.getElementById('subType').value,
-                unitCoefficient: document.getElementById('unitCoefficient').value,
-                receiveStatus: document.getElementById('receiveStatus').value
+                subType: subType,
+                unitCoefficient: unitCoefficient,
+                receiveStatus: document.getElementById('receiveStatus').value,
+                purchaseTime: document.getElementById('purchaseTime').value
             };
             fetch('/api/consumption', {
                 method: 'POST',
@@ -489,68 +809,92 @@
 
         // 批量新增弹窗
         function openBatchModal() {
-            document.getElementById('batchModal').style.display = 'flex';
+            document.getElementById('batchModal').classList.remove('hidden');
         }
         function closeBatchModal() {
-            document.getElementById('batchModal').style.display = 'none';
+            document.getElementById('batchModal').classList.add('hidden');
         }
         function addMoreBatchItem() {
             const container = document.getElementById('batchFormContainer');
             const newItem = document.createElement('div');
-            newItem.className = 'batch-item';
+            newItem.className = 'border border-border-color rounded-xl p-4 mb-4';
             newItem.innerHTML = `
-                <div class="form-item">
-                    <label>消费内容：</label>
-                    <input type="text" class="batch-content" placeholder="请输入消费内容">
-                </div>
-                <div class="form-item">
-                    <label>数量：</label>
-                    <input type="number" class="batch-quantity" value="1" step="0.1">
-                </div>
-                <div class="form-item">
-                    <label>总价：</label>
-                    <input type="number" class="batch-totalPrice" value="0" step="0.01">
-                </div>
-                <div class="form-item">
-                    <label>购买渠道：</label>
-                    <select class="batch-channel">
-                        {% for ch in channels %}
-                        <option value="{{ ch.name }}">{{ ch.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="form-item">
-                    <label>账单大类：</label>
-                    <select class="batch-mainType">
-                        {% for mt in main_types %}
-                        <option value="{{ mt.name }}">{{ mt.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="form-item">
-                    <label>细分类型：</label>
-                    <select class="batch-subType">
-                        {% for st in sub_types %}
-                        <option value="{{ st.name }}">{{ st.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-secondary mb-1">消费内容 *</label>
+                        <input type="text" class="batch-content input" placeholder="请输入消费内容">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-secondary mb-1">数量 *</label>
+                        <input type="number" class="batch-quantity input" value="1" step="0.1">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-secondary mb-1">总价 *</label>
+                        <input type="number" class="batch-totalPrice input" value="0" step="0.01">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-secondary mb-1">购买渠道 *</label>
+                        <select class="batch-channel select">
+                            {% for ch in channels %}
+                            <option value="{{ ch.name }}">{{ ch.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-secondary mb-1">账单类型 *</label>
+                        <select class="batch-mainType select">
+                            {% for mt in main_types %}
+                            <option value="{{ mt.name }}">{{ mt.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                                <label class="block text-sm font-medium text-secondary mb-1">统计类型（可选）</label>
+                                <select class="batch-subType select">
+                                    {% for st in sub_types %}
+                                    <option value="{{ st.name }}">{{ st.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-secondary mb-1">换算系数</label>
+                                <input type="number" class="batch-unitCoefficient input" value="1" step="0.1">
+                            </div>
+                        </div>
             `;
             container.appendChild(newItem);
         }
         function submitBatch() {
-            const items = document.querySelectorAll('.batch-item');
+            const items = document.querySelectorAll('#batchFormContainer > div');
             const list = [];
+            let isValid = true;
+            
             items.forEach(item => {
+                const subType = item.querySelector('.batch-subType').value;
+                const unitCoefficient = item.querySelector('.batch-unitCoefficient').value;
+                
+                // 验证：如果选择了统计类型，则换算系数必填
+                if (subType && !unitCoefficient) {
+                    alert('选择统计类型后，换算系数为必填项！');
+                    isValid = false;
+                    return;
+                }
+                
                 list.push({
                     content: item.querySelector('.batch-content').value,
                     quantity: item.querySelector('.batch-quantity').value,
                     totalPrice: item.querySelector('.batch-totalPrice').value,
                     channel: item.querySelector('.batch-channel').value,
                     mainType: item.querySelector('.batch-mainType').value,
-                    subType: item.querySelector('.batch-subType').value
+                    subType: subType,
+                    unitCoefficient: unitCoefficient
                 });
             });
+            
+            if (!isValid) {
+                return;
+            }
+            
             fetch('/api/consumption/batch', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -570,28 +914,42 @@
 
         // 修改消费项
         function editItem(item) {
+            // 修改弹窗标题
+            document.querySelector('#addModal h3').textContent = '修改消费项';
+            
             // 填充到新增弹窗（复用弹窗）
-            document.getElementById('content').value = item.content;
-            document.getElementById('quantity').value = item.quantity;
-            document.getElementById('totalPrice').value = item.total_price;
-            document.getElementById('channel').value = item.channel;
-            document.getElementById('mainType').value = item.main_type;
-            document.getElementById('subType').value = item.sub_type;
-            document.getElementById('unitCoefficient').value = item.unit_coefficient;
-            document.getElementById('receiveStatus').value = item.receive_status;
+            document.getElementById('content').value = item.content || '';
+            document.getElementById('quantity').value = item.quantity || 1;
+            document.getElementById('totalPrice').value = item.total_price || 0;
+            document.getElementById('channel').value = item.channel || '';
+            document.getElementById('mainType').value = item.main_type || '';
+            document.getElementById('subType').value = item.sub_type || '';
+            document.getElementById('unitCoefficient').value = item.unit_coefficient || 1;
+            document.getElementById('receiveStatus').value = item.receive_status || '已收货';
+            document.getElementById('purchaseTime').value = item.create_time ? item.create_time : '';
             
             // 替换提交按钮为更新逻辑
-            const submitBtn = document.querySelector('#addModal .btn');
+            const submitBtn = document.querySelector('#addModal .btn-primary');
             submitBtn.onclick = function() {
+                const subType = document.getElementById('subType').value;
+                const unitCoefficient = document.getElementById('unitCoefficient').value;
+                
+                // 验证：如果选择了统计类型，则换算系数必填
+                if (subType && !unitCoefficient) {
+                    alert('选择统计类型后，换算系数为必填项！');
+                    return;
+                }
+                
                 const data = {
                     content: document.getElementById('content').value,
                     quantity: document.getElementById('quantity').value,
                     totalPrice: document.getElementById('totalPrice').value,
                     channel: document.getElementById('channel').value,
                     mainType: document.getElementById('mainType').value,
-                    subType: document.getElementById('subType').value,
-                    unitCoefficient: document.getElementById('unitCoefficient').value,
-                    receiveStatus: document.getElementById('receiveStatus').value
+                    subType: subType,
+                    unitCoefficient: unitCoefficient,
+                    receiveStatus: document.getElementById('receiveStatus').value,
+                    purchaseTime: document.getElementById('purchaseTime').value
                 };
                 fetch(`/api/consumption/${item.id}`, {
                     method: 'PUT',
@@ -606,6 +964,8 @@
                         loadConsumptionList();
                         // 恢复提交按钮原逻辑
                         submitBtn.onclick = submitAdd;
+                        // 恢复弹窗标题
+                        document.querySelector('#addModal h3').textContent = '新增消费项';
                     } else {
                         alert(data.message);
                     }
@@ -614,9 +974,185 @@
             openAddModal();
         }
 
+        // 使用消费项
+        let currentUseItem = null;
+        function useItem(item) {
+            currentUseItem = item;
+            document.getElementById('useItemInfo').innerHTML = `
+                <p><strong>消费内容：</strong>${item.content}</p>
+                <p><strong>数量：</strong>${item.quantity}</p>
+                <p><strong>总价：</strong>¥${item.total_price.toFixed(2)}</p>
+                <p><strong>统计类型：</strong>${item.sub_type || '未设置'}</p>
+            `;
+            
+            // 清空表单容器，只保留一个初始表单
+            const container = document.getElementById('useFormContainer');
+            container.innerHTML = `
+                <div class="flex flex-wrap gap-4 items-center">
+                    <div class="flex-1 min-w-[200px]">
+                        <label class="block text-sm font-medium text-secondary mb-1">使用开始时间</label>
+                        <input type="text" class="use-start-time input" placeholder="选择开始时间">
+                    </div>
+                    <div class="flex-1 min-w-[200px]">
+                        <label class="block text-sm font-medium text-secondary mb-1">使用结束时间</label>
+                        <input type="text" class="use-end-time input" placeholder="选择结束时间">
+                    </div>
+                </div>
+            `;
+            
+            // 初始化日期选择器
+            setTimeout(() => {
+                const startTimeInputs = document.querySelectorAll('.use-start-time');
+                const endTimeInputs = document.querySelectorAll('.use-end-time');
+                
+                startTimeInputs.forEach(input => {
+                    flatpickr(input, {
+                        locale: 'zh',
+                        dateFormat: 'Y-m-d'
+                    });
+                });
+                
+                endTimeInputs.forEach(input => {
+                    flatpickr(input, {
+                        locale: 'zh',
+                        dateFormat: 'Y-m-d'
+                    });
+                });
+            }, 100);
+            
+            document.getElementById('useModal').classList.remove('hidden');
+        }
+        function closeUseModal() {
+            document.getElementById('useModal').classList.add('hidden');
+            currentUseItem = null;
+        }
+        function addMoreUseItem() {
+            if (!currentUseItem) return;
+            
+            const container = document.getElementById('useFormContainer');
+            const useItems = container.querySelectorAll('div.flex.flex-wrap.gap-4.items-center');
+            
+            // 检查是否超过数量限制
+            if (useItems.length >= currentUseItem.quantity) {
+                alert(`使用记录数量不能超过消费项数量（${currentUseItem.quantity}）！`);
+                return;
+            }
+            
+            const newItem = document.createElement('div');
+            newItem.className = 'flex flex-wrap gap-4 items-center';
+            newItem.innerHTML = `
+                <div class="flex-1 min-w-[200px]">
+                    <label class="block text-sm font-medium text-secondary mb-1">使用开始时间</label>
+                    <input type="text" class="use-start-time input" placeholder="选择开始时间">
+                </div>
+                <div class="flex-1 min-w-[200px]">
+                    <label class="block text-sm font-medium text-secondary mb-1">使用结束时间</label>
+                    <input type="text" class="use-end-time input" placeholder="选择结束时间">
+                </div>
+            `;
+            container.appendChild(newItem);
+            
+            // 初始化新添加的日期选择器
+            setTimeout(() => {
+                const newStartTimeInput = newItem.querySelector('.use-start-time');
+                const newEndTimeInput = newItem.querySelector('.use-end-time');
+                
+                flatpickr(newStartTimeInput, {
+                    locale: 'zh',
+                    dateFormat: 'Y-m-d'
+                });
+                
+                flatpickr(newEndTimeInput, {
+                    locale: 'zh',
+                    dateFormat: 'Y-m-d'
+                });
+            }, 100);
+        }
+        function submitUseItem() {
+            if (!currentUseItem) return;
+            
+            const useItems = document.querySelectorAll('#useFormContainer > div');
+            const useRecords = [];
+            
+            useItems.forEach((item, index) => {
+                const startTime = item.querySelector('.use-start-time').value;
+                const endTime = item.querySelector('.use-end-time').value;
+                
+                if (startTime && endTime) {
+                    useRecords.push({
+                        startUseTime: startTime,
+                        endUseTime: endTime
+                    });
+                }
+            });
+            
+            if (useRecords.length === 0) {
+                alert('请至少填写一条使用记录！');
+                return;
+            }
+            
+            // 这里可以根据实际需求处理使用记录
+            // 例如，更新消费项的使用状态，或者创建使用记录
+            alert(`成功提交 ${useRecords.length} 条使用记录！`);
+            closeUseModal();
+            loadConsumptionList();
+        }
+
+        // 通过ID编辑消费项
+        function editItemById(id) {
+            console.log('开始编辑消费项，ID:', id);
+            fetch(`/api/consumption/${id}`)
+                .then(res => {
+                    console.log('API响应状态:', res.status);
+                    if (!res.ok) {
+                        throw new Error('网络响应错误: ' + res.status);
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    console.log('获取消费项数据:', data);
+                    if (data.success) {
+                        editItem(data.data);
+                    } else {
+                        alert('获取数据失败: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('获取消费项失败:', error);
+                    alert('网络错误，请重试！');
+                });
+        }
+
+        // 通过ID使用消费项
+        function useItemById(id) {
+            console.log('开始使用消费项，ID:', id);
+            fetch(`/api/consumption/${id}`)
+                .then(res => {
+                    console.log('API响应状态:', res.status);
+                    if (!res.ok) {
+                        throw new Error('网络响应错误: ' + res.status);
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    console.log('获取消费项数据:', data);
+                    if (data.success) {
+                        useItem(data.data);
+                    } else {
+                        alert('获取数据失败: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('获取消费项失败:', error);
+                    alert('网络错误，请重试！');
+                });
+        }
+
         // 删除消费项
         function deleteItem(id) {
-            if (confirm(`确定删除ID为${id}的消费项吗？`)) {
+            // 使用更明确的确认对话框
+            const result = window.confirm(`确定删除ID为${id}的消费项吗？`);
+            if (result) {
                 fetch(`/api/consumption/${id}`, { method: 'DELETE' })
                 .then(res => res.json())
                 .then(data => {
@@ -626,7 +1162,28 @@
                     } else {
                         alert(data.message);
                     }
+                })
+                .catch(error => {
+                    console.error('删除失败：', error);
+                    alert('删除失败，请重试！');
                 });
+            }
+        }
+
+        // 格式化日期显示
+        function formatDateDisplay(dateStr) {
+            if (!dateStr) return '';
+            try {
+                // 尝试解析带时间的格式
+                const dt = new Date(dateStr);
+                const year = dt.getFullYear();
+                const month = String(dt.getMonth() + 1).padStart(2, '0');
+                const day = String(dt.getDate()).padStart(2, '0');
+                const hours = String(dt.getHours()).padStart(2, '0');
+                const minutes = String(dt.getMinutes()).padStart(2, '0');
+                return `${year}-${month}-${day} ${hours}:${minutes}`;
+            } catch (error) {
+                return dateStr;
             }
         }
 
