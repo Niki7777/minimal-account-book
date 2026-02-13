@@ -218,48 +218,16 @@
     </footer>
 
     <script>
-        // 初始化日期选择器
-        document.addEventListener('DOMContentLoaded', function() {
-            // 开始日期选择器
-            flatpickr('#startDate', {
-                locale: 'zh',
-                dateFormat: 'Y-m-d'
-            });
-            
-            // 结束日期选择器
-            flatpickr('#endDate', {
-                locale: 'zh',
-                dateFormat: 'Y-m-d'
-            });
-        });
+        // 全局变量
+        let chart = null;
 
-        // 初始化图表
-        const chart = echarts.init(document.getElementById('pieChart'));
-        chart.setOption({
-            tooltip: {
-                trigger: 'item',
-                formatter: '{b}: ¥{c} ({d}%)'
-            },
-            series: [{
-                name: '消费金额',
-                type: 'pie',
-                radius: '60%',
-                data: [],
-                emphasis: {
-                    itemStyle: {
-                        shadowBlur: 10,
-                        shadowOffsetX: 0,
-                        shadowColor: 'rgba(0, 0, 0, 0.5)'
-                    }
-                },
-                label: {
-                    color: '#64748b'
-                }
-            }]
-        });
-
-        // 加载统计数据
+        // 加载统计数据函数（全局作用域）
         function loadStatistics() {
+            if (!chart) {
+                console.error('图表未初始化');
+                return;
+            }
+            
             const start = document.getElementById('startDate').value;
             const end = document.getElementById('endDate').value;
             
@@ -279,8 +247,48 @@
                 .catch(err => console.error('加载统计数据失败:', err));
         }
 
-        // 页面加载时默认查询
-        window.onload = loadStatistics;
+        // 初始化日期选择器和图表
+        document.addEventListener('DOMContentLoaded', function() {
+            // 开始日期选择器
+            flatpickr('#startDate', {
+                locale: 'zh',
+                dateFormat: 'Y-m-d'
+            });
+            
+            // 结束日期选择器
+            flatpickr('#endDate', {
+                locale: 'zh',
+                dateFormat: 'Y-m-d'
+            });
+
+            // 初始化图表
+            chart = echarts.init(document.getElementById('pieChart'));
+            chart.setOption({
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{b}: ¥{c} ({d}%)'
+                },
+                series: [{
+                    name: '消费金额',
+                    type: 'pie',
+                    radius: '60%',
+                    data: [],
+                    emphasis: {
+                        itemStyle: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    },
+                    label: {
+                        color: '#64748b'
+                    }
+                }]
+            });
+
+            // 页面加载时默认查询
+            loadStatistics();
+        });
     </script>
 </body>
 </html>
