@@ -7,7 +7,7 @@
     <!-- Tailwind CSS v3 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
-    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Tailwind 配置 -->
     <script>
         tailwind.config = {
@@ -28,6 +28,14 @@
                     },
                     fontFamily: {
                         sans: ['Inter', 'Microsoft YaHei', 'sans-serif']
+                    },
+                    fontSize: {
+                        'xs': ['0.75rem', { lineHeight: '1rem' }],
+                        'sm': ['0.875rem', { lineHeight: '1.25rem' }],
+                        'base': ['1rem', { lineHeight: '1.5rem' }],
+                        'lg': ['1.125rem', { lineHeight: '1.75rem' }],
+                        'xl': ['1.25rem', { lineHeight: '1.75rem' }],
+                        '2xl': ['1.5rem', { lineHeight: '2rem' }]
                     },
                     boxShadow: {
                         'card': '0 2px 8px 0 rgba(0, 0, 0, 0.08)',
@@ -51,7 +59,7 @@
                 @apply shadow-card-hover transform -translate-y-1;
             }
             .btn {
-                @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+                @apply px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
             }
             .btn-primary {
                 @apply bg-primary text-white hover:bg-primary/90 focus:ring-primary;
@@ -70,6 +78,22 @@
             }
             .btn-outline {
                 @apply border border-border-color text-secondary hover:bg-secondary-light focus:ring-primary;
+            }
+            /* 移动端友好按钮样式 - 浅色背景配彩色文字 */
+            .btn-edit {
+                @apply px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 bg-amber-100 text-amber-600 hover:bg-amber-200 active:bg-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-400 flex items-center justify-center gap-1;
+            }
+            .btn-use {
+                @apply px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 bg-emerald-100 text-emerald-600 hover:bg-emerald-200 active:bg-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-400 flex items-center justify-center gap-1;
+            }
+            .btn-delete {
+                @apply px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 bg-rose-100 text-rose-600 hover:bg-rose-200 active:bg-rose-300 focus:outline-none focus:ring-2 focus:ring-rose-400 flex items-center justify-center gap-1;
+            }
+            .btn-action {
+                @apply px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 bg-blue-100 text-blue-600 hover:bg-blue-200 active:bg-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400 flex items-center justify-center gap-1;
+            }
+            .btn-neutral {
+                @apply px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 bg-gray-100 text-gray-600 hover:bg-gray-200 active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 flex items-center justify-center gap-1;
             }
             .input {
                 @apply w-full px-4 py-2 border border-border-color rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
@@ -125,42 +149,40 @@
     <main class="flex-grow container mx-auto px-4 py-6 pb-20">
         <div class="space-y-6">
             <div class="flex justify-between items-center">
-                <h1 class="text-xl sm:text-2xl font-bold text-secondary">设置</h1>
+                <h1 class="text-2xl font-bold text-secondary">设置</h1>
             </div>
-            
+
             <!-- 渠道管理 -->
             <div class="card p-6">
                 <h3 class="text-lg font-semibold text-secondary mb-4">购买渠道管理</h3>
                 <div class="flex flex-col md:flex-row gap-4 mb-6">
-                    <input type="text" id="channelName" placeholder="请输入渠道名称" class="input flex-1">
-                    <button class="btn btn-primary whitespace-nowrap" onclick="addChannel()">
-                        <i class="fa fa-plus mr-1"></i>添加渠道
+                    <input type="text" id="channelName" placeholder="请输入渠道名称" class="input flex-1 text-base">
+                    <button class="btn-action whitespace-nowrap text-base" onclick="addChannel()">
+                        <i class="fa fa-plus"></i>添加渠道
                     </button>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-secondary-light">
                             <tr>
-                                <th class="px-4 py-3 text-left text-sm font-medium text-secondary border-b border-border-color w-16">ID</th>
-                                <th class="px-4 py-3 text-left text-sm font-medium text-secondary border-b border-border-color">渠道名称</th>
-                                <th class="px-4 py-3 text-left text-sm font-medium text-secondary border-b border-border-color w-32">操作</th>
+                                <th class="px-4 py-3 text-left text-base font-medium text-secondary border-b border-border-color">渠道名称</th>
+                                <th class="px-4 py-3 text-left text-base font-medium text-secondary border-b border-border-color w-32">操作</th>
                             </tr>
                         </thead>
                         <tbody id="channelTable">
                             {% for ch in channels %}
                             <tr class="hover:bg-secondary-light/50 transition-colors">
-                                <td class="px-4 py-3 text-sm border-b border-border-color">{{ ch.id }}</td>
-                                <td class="px-4 py-3 text-sm border-b border-border-color">{{ ch.name }}</td>
-                                <td class="px-4 py-3 text-sm border-b border-border-color">
-                                    <div class="flex gap-2">
-                                        <button class="px-2 py-1 text-xs bg-warning/10 text-warning rounded hover:bg-warning/20 transition-colors whitespace-nowrap" onclick="editChannel({{ ch.id }}, '{{ ch.name }}')">
-                                            <i class="fa fa-pencil mr-1"></i>编辑
-                                        </button>
-                                        <button class="px-2 py-1 text-xs bg-danger/10 text-danger rounded hover:bg-danger/20 transition-colors whitespace-nowrap" onclick="deleteChannel({{ ch.id }})">
-                                            <i class="fa fa-trash mr-1"></i>删除
-                                        </button>
-                                    </div>
-                                </td>
+                                <td class="px-4 py-3 text-base border-b border-border-color">{{ ch.name }}</td>
+                                <td class="px-4 py-3 text-base border-b">
+                                        <div class="flex items-center gap-2">
+                                            <button class="btn-edit whitespace-nowrap text-base" onclick="editChannel({{ ch.id }}, '{{ ch.name }}')">
+                                                <i class="fa fa-pencil"></i>编辑
+                                            </button>
+                                            <button class="btn-delete whitespace-nowrap text-base" onclick="deleteChannel({{ ch.id }})">
+                                                <i class="fa fa-trash"></i>删除
+                                            </button>
+                                        </div>
+                                    </td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -172,75 +194,71 @@
             <div class="card p-6">
                 <h3 class="text-lg font-semibold text-secondary mb-4">账单类型管理</h3>
                 <div class="flex flex-col md:flex-row gap-4 mb-6">
-                    <input type="text" id="mainTypeName" placeholder="请输入账单类型名称" class="input flex-1">
-                    <button class="btn btn-primary whitespace-nowrap" onclick="addMainType()">
-                        <i class="fa fa-plus mr-1"></i>添加账单类型
+                    <input type="text" id="mainTypeName" placeholder="请输入账单类型名称" class="input flex-1 text-base">
+                    <button class="btn-action whitespace-nowrap text-base" onclick="addMainType()">
+                        <i class="fa fa-plus"></i>添加主类型
                     </button>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-secondary-light">
                             <tr>
-                                <th class="px-4 py-3 text-left text-sm font-medium text-secondary border-b border-border-color w-16">ID</th>
-                                <th class="px-4 py-3 text-left text-sm font-medium text-secondary border-b border-border-color">账单类型名称</th>
-                                <th class="px-4 py-3 text-left text-sm font-medium text-secondary border-b border-border-color w-32">操作</th>
+                                <th class="px-4 py-3 text-left text-base font-medium text-secondary border-b border-border-color">账单类型名称</th>
+                                <th class="px-4 py-3 text-left text-base font-medium text-secondary border-b border-border-color w-32">操作</th>
                             </tr>
                         </thead>
                         <tbody id="mainTypeTable">
                             {% for mt in main_types %}
                             <tr class="hover:bg-secondary-light/50 transition-colors">
-                                <td class="px-4 py-3 text-sm border-b border-border-color">{{ mt.id }}</td>
-                                <td class="px-4 py-3 text-sm border-b border-border-color">{{ mt.name }}</td>
-                                <td class="px-4 py-3 text-sm border-b border-border-color">
-                                    <div class="flex gap-2">
-                                        <button class="px-2 py-1 text-xs bg-warning/10 text-warning rounded hover:bg-warning/20 transition-colors whitespace-nowrap" onclick="editMainType({{ mt.id }}, '{{ mt.name }}')">
-                                            <i class="fa fa-pencil mr-1"></i>编辑
-                                        </button>
-                                        <button class="px-2 py-1 text-xs bg-danger/10 text-danger rounded hover:bg-danger/20 transition-colors whitespace-nowrap" onclick="deleteMainType({{ mt.id }})">
-                                            <i class="fa fa-trash mr-1"></i>删除
-                                        </button>
-                                    </div>
-                                </td>
+                                <td class="px-4 py-3 text-base border-b border-border-color">{{ mt.name }}</td>
+                                <td class="px-4 py-3 text-base border-b border-border-color">
+                                        <div class="flex gap-2">
+                                            <button class="btn-edit whitespace-nowrap text-base" onclick="editMainType({{ mt.id }}, '{{ mt.name }}')">
+                                                <i class="fa fa-pencil"></i>编辑
+                                            </button>
+                                            <button class="btn-delete whitespace-nowrap text-base" onclick="deleteMainType({{ mt.id }})">
+                                                <i class="fa fa-trash"></i>删除
+                                            </button>
+                                        </div>
+                                    </td>
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
             </div>
-            
+
             <!-- 统计类型管理 -->
             <div class="card p-6">
                 <h3 class="text-lg font-semibold text-secondary mb-4">统计类型管理</h3>
                 <div class="flex flex-col md:flex-row gap-4 mb-6">
-                    <input type="text" id="subTypeName" placeholder="请输入统计类型名称" class="input flex-1">
-                    <button class="btn btn-primary whitespace-nowrap" onclick="addSubType()">
-                        <i class="fa fa-plus mr-1"></i>添加统计类型
+                    <input type="text" id="subTypeName" placeholder="请输入统计类型名称" class="input flex-1 text-base">
+                    <button class="btn-action whitespace-nowrap text-base" onclick="addSubType()">
+                        <i class="fa fa-plus"></i>添加统计类型
                     </button>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-secondary-light">
                             <tr>
-                                <th class="px-4 py-3 text-left text-sm font-medium text-secondary border-b border-border-color w-16">ID</th>
-                                <th class="px-4 py-3 text-left text-sm font-medium text-secondary border-b border-border-color">统计类型名称</th>
-                                <th class="px-4 py-3 text-left text-sm font-medium text-secondary border-b border-border-color w-32">操作</th>
+                                <th class="px-4 py-3 text-left text-base font-medium text-secondary border-b border-border-color">统计类型名称</th>
+                                <th class="px-4 py-3 text-left text-base font-medium text-secondary border-b border-border-color w-32">操作</th>
                             </tr>
                         </thead>
                         <tbody id="subTypeTable">
                             {% for st in sub_types %}
                             <tr class="hover:bg-secondary-light/50 transition-colors">
-                                <td class="px-4 py-3 text-sm border-b border-border-color">{{ st.id }}</td>
-                                <td class="px-4 py-3 text-sm border-b border-border-color">{{ st.name }}</td>
-                                <td class="px-4 py-3 text-sm border-b border-border-color">
-                                    <div class="flex gap-2">
-                                        <button class="px-2 py-1 text-xs bg-warning/10 text-warning rounded hover:bg-warning/20 transition-colors whitespace-nowrap" onclick="editSubType({{ st.id }}, '{{ st.name }}')">
-                                            <i class="fa fa-pencil mr-1"></i>编辑
-                                        </button>
-                                        <button class="px-2 py-1 text-xs bg-danger/10 text-danger rounded hover:bg-danger/20 transition-colors whitespace-nowrap" onclick="deleteSubType({{ st.id }})">
-                                            <i class="fa fa-trash mr-1"></i>删除
-                                        </button>
-                                    </div>
-                                </td>
+                                <td class="px-4 py-3 text-base border-b border-border-color">{{ st.name }}</td>
+                                <td class="px-4 py-3 text-base border-b border-border-color">
+                                        <div class="flex gap-2">
+                                            <button class="btn-edit whitespace-nowrap text-base" onclick="editSubType({{ st.id }}, '{{ st.name }}')">
+                                                <i class="fa fa-pencil"></i>编辑
+                                            </button>
+                                            <button class="btn-delete whitespace-nowrap text-base" onclick="deleteSubType({{ st.id }})">
+                                                <i class="fa fa-trash"></i>删除
+                                            </button>
+                                        </div>
+                                    </td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -249,6 +267,14 @@
             </div>
         </div>
     </main>
+
+    <!-- Toast 轻提示 -->
+    <div id="toast" class="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 hidden">
+        <div class="bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3 min-w-[200px] max-w-[80vw]">
+            <i class="fas fa-info-circle" id="toastIcon"></i>
+            <span id="toastMessage" class="text-sm">提示信息</span>
+        </div>
+    </div>
 
     <!-- 底部导航栏 -->
     <footer class="fixed bottom-0 left-0 right-0 bg-white shadow-md z-40">
@@ -280,10 +306,35 @@
     </footer>
 
     <script>
+        // 显示 Toast 轻提示
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const msg = document.getElementById('toastMessage');
+            const icon = document.getElementById('toastIcon');
+            
+            msg.textContent = message;
+            
+            // 设置图标和颜色
+            if (type === 'error') {
+                icon.className = 'fas fa-times-circle text-red-400';
+            } else if (type === 'success') {
+                icon.className = 'fas fa-check-circle text-green-400';
+            } else {
+                icon.className = 'fas fa-info-circle text-blue-400';
+            }
+            
+            toast.classList.remove('hidden');
+            
+            // 3秒后自动隐藏
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
         // 渠道管理
         function addChannel() {
             const name = document.getElementById('channelName').value;
-            if (!name) { alert('渠道名称不能为空！'); return; }
+            if (!name) { showToast('渠道名称不能为空！', 'info'); return; }
             fetch('/api/channel', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -292,10 +343,10 @@
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    alert(data.message);
+                    showToast(data.message, 'success');
                     window.location.reload();
                 } else {
-                    alert(data.message);
+                    showToast(data.message, 'error');
                 }
             });
         }
@@ -310,10 +361,10 @@
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    alert(data.message);
+                    showToast(data.message, 'success');
                     window.location.reload();
                 } else {
-                    alert(data.message);
+                    showToast(data.message, 'error');
                 }
             });
         }
@@ -323,10 +374,10 @@
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) {
-                        alert(data.message);
+                        showToast(data.message, 'success');
                         window.location.reload();
                     } else {
-                        alert(data.message);
+                        showToast(data.message, 'error');
                     }
                 });
             }
@@ -335,7 +386,7 @@
         // 账单类型管理
         function addMainType() {
             const name = document.getElementById('mainTypeName').value;
-            if (!name) { alert('账单类型名称不能为空！'); return; }
+            if (!name) { showToast('账单类型名称不能为空！', 'info'); return; }
             fetch('/api/main-type', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -344,10 +395,10 @@
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    alert(data.message);
+                    showToast(data.message, 'success');
                     window.location.reload();
                 } else {
-                    alert(data.message);
+                    showToast(data.message, 'error');
                 }
             });
         }
@@ -362,10 +413,10 @@
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    alert(data.message);
+                    showToast(data.message, 'success');
                     window.location.reload();
                 } else {
-                    alert(data.message);
+                    showToast(data.message, 'error');
                 }
             });
         }
@@ -375,10 +426,10 @@
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) {
-                        alert(data.message);
+                        showToast(data.message, 'success');
                         window.location.reload();
                     } else {
-                        alert(data.message);
+                        showToast(data.message, 'error');
                     }
                 });
             }
@@ -387,7 +438,7 @@
         // 统计类型管理
         function addSubType() {
             const name = document.getElementById('subTypeName').value;
-            if (!name) { alert('统计类型名称不能为空！'); return; }
+            if (!name) { showToast('统计类型名称不能为空！', 'info'); return; }
             fetch('/api/sub-type', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -396,10 +447,10 @@
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    alert(data.message);
+                    showToast(data.message, 'success');
                     window.location.reload();
                 } else {
-                    alert(data.message);
+                    showToast(data.message, 'error');
                 }
             });
         }
@@ -414,10 +465,10 @@
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    alert(data.message);
+                    showToast(data.message, 'success');
                     window.location.reload();
                 } else {
-                    alert(data.message);
+                    showToast(data.message, 'error');
                 }
             });
         }
@@ -427,10 +478,10 @@
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) {
-                        alert(data.message);
+                        showToast(data.message, 'success');
                         window.location.reload();
                     } else {
-                        alert(data.message);
+                        showToast(data.message, 'error');
                     }
                 });
             }

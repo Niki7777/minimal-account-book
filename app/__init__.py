@@ -14,7 +14,9 @@ db = SQLAlchemy()
 def create_app():
     # 获取项目根目录
     basedir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-    app = Flask(__name__, template_folder=os.path.join(basedir, 'templates'))
+    app = Flask(__name__, 
+                template_folder=os.path.join(basedir, 'templates'),
+                static_folder=os.path.join(basedir, 'static'))
     
     # 配置应用
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'default-secret-key')

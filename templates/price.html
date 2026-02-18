@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>统计 - 极简记账本</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Flatpickr (现代化日期选择器) -->
-    <link href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/zh.js"></script>
+    <link href="{{ url_for('static', filename='css/lib/flatpickr.min.css') }}" rel="stylesheet">
+    <script src="{{ url_for('static', filename='js/flatpickr.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/flatpickr.zh.js') }}"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -29,6 +29,14 @@
                     },
                     fontFamily: {
                         sans: ['Inter', 'Microsoft YaHei', 'sans-serif']
+                    },
+                    fontSize: {
+                        'xs': ['0.75rem', { lineHeight: '1rem' }],
+                        'sm': ['0.875rem', { lineHeight: '1.25rem' }],
+                        'base': ['1rem', { lineHeight: '1.5rem' }],
+                        'lg': ['1.125rem', { lineHeight: '1.75rem' }],
+                        'xl': ['1.25rem', { lineHeight: '1.75rem' }],
+                        '2xl': ['1.5rem', { lineHeight: '2rem' }]
                     },
                     boxShadow: {
                         'card': '0 2px 8px 0 rgba(0, 0, 0, 0.08)',
@@ -51,7 +59,7 @@
                 @apply shadow-card-hover transform -translate-y-1;
             }
             .btn {
-                @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+                @apply px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
             }
             .btn-primary {
                 @apply bg-primary text-white hover:bg-primary/90 focus:ring-primary;
@@ -67,6 +75,22 @@
             }
             .btn-outline {
                 @apply border border-border-color text-secondary hover:bg-secondary-light focus:ring-primary;
+            }
+            /* 移动端友好按钮样式 - 浅色背景配彩色文字 */
+            .btn-edit {
+                @apply px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 bg-amber-100 text-amber-600 hover:bg-amber-200 active:bg-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-400 flex items-center justify-center gap-1;
+            }
+            .btn-use {
+                @apply px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 bg-emerald-100 text-emerald-600 hover:bg-emerald-200 active:bg-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-400 flex items-center justify-center gap-1;
+            }
+            .btn-delete {
+                @apply px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 bg-rose-100 text-rose-600 hover:bg-rose-200 active:bg-rose-300 focus:outline-none focus:ring-2 focus:ring-rose-400 flex items-center justify-center gap-1;
+            }
+            .btn-action {
+                @apply px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 bg-blue-100 text-blue-600 hover:bg-blue-200 active:bg-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400 flex items-center justify-center gap-1;
+            }
+            .btn-neutral {
+                @apply px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 bg-gray-100 text-gray-600 hover:bg-gray-200 active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 flex items-center justify-center gap-1;
             }
             .input {
                 @apply w-full px-4 py-2 border border-border-color rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
@@ -118,6 +142,61 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
+        
+        /* 日期输入框样式 - 使用内联SVG背景图标 */
+        .date-input-wrapper input {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2' ry='2'%3E%3C/rect%3E%3Cline x1='16' y1='2' x2='16' y2='6'%3E%3C/line%3E%3Cline x1='8' y1='2' x2='8' y2='6'%3E%3C/line%3E%3Cline x1='3' y1='10' x2='21' y2='10'%3E%3C/line%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px 16px;
+            padding-right: 40px;
+            cursor: pointer;
+            /* 隐藏浏览器默认日期图标 */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+        /* 针对Webkit浏览器的日期输入框 */
+        .date-input-wrapper input::-webkit-calendar-picker-indicator {
+            opacity: 0;
+            display: none;
+            -webkit-appearance: none;
+        }
+        /* 针对IE/Edge */
+        .date-input-wrapper input::-ms-clear,
+        .date-input-wrapper input::-ms-reveal {
+            display: none;
+        }
+        
+        /* 移动端日期选择器适配 */
+        @media (max-width: 767px) {
+            .flatpickr-calendar {
+                width: 90vw !important;
+                max-width: 320px !important;
+                left: 50% !important;
+                transform: translateX(-50%) !important;
+                position: fixed !important;
+                top: 50% !important;
+                transform: translate(-50%, -50%) !important;
+                z-index: 9999 !important;
+            }
+            .flatpickr-calendar.open {
+                display: block !important;
+            }
+            .flatpickr-days {
+                width: 100% !important;
+            }
+            .dayContainer {
+                width: 100% !important;
+                min-width: 100% !important;
+                max-width: 100% !important;
+            }
+            .flatpickr-day {
+                max-width: none !important;
+                height: 40px !important;
+                line-height: 40px !important;
+            }
+        }
     </style>
 </head>
 <body class="bg-light font-sans">
@@ -125,32 +204,39 @@
     <main class="flex-grow container mx-auto px-4 py-6 pb-20">
         <div class="space-y-6">
             <div class="flex justify-between items-center">
-                <h1 class="text-xl sm:text-2xl font-bold text-secondary">统计</h1>
+                <h1 class="text-2xl font-bold text-secondary">统计</h1>
             </div>
 
         <!-- 查询表单 -->
         <div class="card mb-6 p-6">
-            <div class="flex flex-col md:flex-row items-start md:items-center gap-4 mb-4">
-                <label for="subType" class="text-sm font-medium text-gray-700 w-full md:w-24">统计类型：</label>
-                <select id="subType" class="select flex-1">
-                    <option value="">请选择统计类型</option>
-                    {% for type in sub_types %}
-                        <option value="{{ type.name }}">{{ type.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="flex flex-col md:flex-row items-start md:items-center gap-4 mb-6">
-                <label class="text-sm font-medium text-gray-700 w-full md:w-24">时间范围：</label>
-                <div class="flex flex-col md:flex-row gap-4 flex-1">
-                    <div class="flex-1">
-                        <input type="text" id="startDate" placeholder="开始日期" class="input">
-                    </div>
-                    <div class="flex-1">
-                        <input type="text" id="endDate" placeholder="结束日期" class="input">
+            <div class="flex flex-col gap-4">
+                <!-- 统计类型 -->
+                <div class="flex flex-col md:flex-row md:items-center gap-2">
+                    <label for="subType" class="text-base font-medium text-gray-700 md:w-24">统计类型</label>
+                    <select id="subType" class="select flex-1 text-base">
+                        <option value="">请选择统计类型</option>
+                        {% for type in sub_types %}
+                            <option value="{{ type.name }}">{{ type.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <!-- 时间范围 -->
+                <div class="flex flex-col md:flex-row md:items-center gap-2">
+                    <label class="text-base font-medium text-gray-700 md:w-24">时间范围</label>
+                    <div class="flex flex-col md:flex-row gap-4 flex-1">
+                        <div class="flex-1 date-input-wrapper">
+                            <input type="text" id="startDate" placeholder="开始日期" class="input w-full text-base">
+                        </div>
+                        <div class="flex-1 date-input-wrapper">
+                            <input type="text" id="endDate" placeholder="结束日期" class="input w-full text-base">
+                        </div>
                     </div>
                 </div>
+                <!-- 查询按钮 -->
+                <button class="btn-action text-base" onclick="queryPrice()">
+                    <i class="fa fa-search"></i>查询
+                </button>
             </div>
-            <button class="btn btn-primary" onclick="queryPrice()">查询</button>
         </div>
 
         <!-- 价格统计（查询后显示） -->
@@ -182,27 +268,34 @@
         <!-- 价格列表卡片 - 移动端 -->
         <div class="space-y-4 md:hidden" id="mobilePriceList">
             <div class="card p-10 text-center text-gray-500">
-                <i class="fa fa-search text-3xl mb-3"></i>
+                <i class="fa fa-search text-3xl mb-3 text-gray-400"></i>
                 <p>请选择统计类型并点击查询</p>
-                <p class="text-sm text-gray-400 mt-1">📊</p>
             </div>
         </div>
         </div>
     </main>
 
+    <!-- Toast 轻提示 -->
+    <div id="toast" class="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 hidden">
+        <div class="bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3 min-w-[200px] max-w-[80vw]">
+            <i class="fas fa-info-circle" id="toastIcon"></i>
+            <span id="toastMessage" class="text-sm">提示信息</span>
+        </div>
+    </div>
+
     <!-- 底部导航栏 -->
     <footer class="fixed bottom-0 left-0 right-0 bg-white shadow-md z-40">
         <div class="flex justify-around items-center h-16">
             <a href="/" class="nav-item">
-                <i class="fa fa-home nav-icon"></i>
+                <i class="fas fa-home nav-icon"></i>
                 <span class="nav-label">首页</span>
             </a>
             <a href="/list" class="nav-item">
-                <i class="fa fa-plus-circle nav-icon"></i>
+                <i class="fas fa-plus-circle nav-icon"></i>
                 <span class="nav-label">记账</span>
             </a>
             <a href="/pending" class="nav-item">
-                <i class="fa fa-truck nav-icon"></i>
+                <i class="fas fa-truck nav-icon"></i>
                 <span class="nav-label">待收货</span>
                 {% if pending_count > 0 %}
                 <span class="absolute -top-1 -right-1 bg-danger text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
@@ -211,11 +304,11 @@
                 {% endif %}
             </a>
             <a href="/price" class="nav-item active">
-                <i class="fa fa-bar-chart nav-icon"></i>
+                <i class="fas fa-chart-bar nav-icon"></i>
                 <span class="nav-label">统计</span>
             </a>
             <a href="/manage" class="nav-item">
-                <i class="fa fa-cog nav-icon"></i>
+                <i class="fas fa-cog nav-icon"></i>
                 <span class="nav-label">设置</span>
             </a>
         </div>
@@ -231,13 +324,23 @@
                     flatpickr('#startDate', {
                         locale: 'zh',
                         dateFormat: 'Y-m-d',
-                        maxDate: 'today'
+                        maxDate: 'today',
+                        disableMobile: true,
+                        position: 'auto',
+                        appendTo: document.body,
+                        clickOpens: true,
+                        allowInput: false
                     });
                     
                     flatpickr('#endDate', {
                         locale: 'zh',
                         dateFormat: 'Y-m-d',
-                        maxDate: 'today'
+                        maxDate: 'today',
+                        disableMobile: true,
+                        position: 'auto',
+                        appendTo: document.body,
+                        clickOpens: true,
+                        allowInput: false
                     });
                 } catch (error) {
                     console.error('初始化日期选择器失败:', error);
@@ -284,6 +387,31 @@
             }
         }
 
+        // 显示 Toast 轻提示
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const msg = document.getElementById('toastMessage');
+            const icon = document.getElementById('toastIcon');
+            
+            msg.textContent = message;
+            
+            // 设置图标和颜色
+            if (type === 'error') {
+                icon.className = 'fas fa-times-circle text-red-400';
+            } else if (type === 'success') {
+                icon.className = 'fas fa-check-circle text-green-400';
+            } else {
+                icon.className = 'fas fa-info-circle text-blue-400';
+            }
+            
+            toast.classList.remove('hidden');
+            
+            // 3秒后自动隐藏
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
         // 查询价格
         function queryPrice() {
             const subType = document.getElementById('subType').value;
@@ -291,7 +419,7 @@
             const endDate = document.getElementById('endDate').value;
             
             if (!subType) {
-                alert('请选择要查询的统计类型！');
+                showToast('请选择要查询的统计类型！');
                 return;
             }
 
@@ -334,25 +462,14 @@
                         const card = document.createElement('div');
                         card.className = 'card p-4';
                         card.innerHTML = `
-                            <div class="flex justify-between items-start mb-3">
-                                <div>
-                                    <h3 class="font-medium text-secondary mb-1">${item.content}</h3>
-                                    <p class="text-sm text-gray-500">统计类型: ${item.sub_type}</p>
-                                </div>
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-medium text-secondary flex-1 pr-2">${item.content}</h3>
+                                <span class="font-medium text-primary whitespace-nowrap">¥${item.min_unit_price || '0.00'}</span>
                             </div>
-                            <div class="grid grid-cols-2 gap-2 mb-3">
-                                <div class="text-sm">
-                                    <span class="text-gray-500">总价:</span> <span class="font-medium text-secondary">¥${item.total_price}</span>
-                                </div>
-                                <div class="text-sm">
-                                    <span class="text-gray-500">最小单位单价:</span> ¥${item.min_unit_price || '0.00'}
-                                </div>
-                                <div class="text-sm">
-                                    <span class="text-gray-500">购买日期:</span> ${formatDateDisplay(item.create_time).split(' ')[0]}
-                                </div>
-                                <div class="text-sm">
-                                    <span class="text-gray-500">购买渠道:</span> ${item.channel}
-                                </div>
+                            <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-500">
+                                <span>总价: ¥${item.total_price}</span>
+                                <span>${formatDateDisplay(item.create_time).split(' ')[0]}</span>
+                                <span>${item.channel}</span>
                             </div>
                         `;
                         mobileList.appendChild(card);
@@ -380,40 +497,39 @@
                     priceStat.style.display = 'block';
                     priceStat.innerHTML = `
                         <div class="card p-4">
-                            <div class="flex items-center gap-2 mb-3">
-                                <i class="fa fa-bar-chart text-primary text-lg"></i>
-                                <h3 class="text-lg font-semibold text-secondary">统计（${subType}）</h3>
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center gap-2">
+                                    <i class="fa fa-bar-chart text-primary text-lg"></i>
+                                    <h3 class="text-lg font-semibold text-secondary">统计（${subType}）</h3>
+                                </div>
+                                <span class="text-sm text-gray-500">${data.count}条记录</span>
                             </div>
-                            <div class="grid grid-cols-2 gap-3">
-                                <div class="bg-secondary-light/50 p-3 rounded-lg">
-                                    <div class="text-xs text-gray-500 mb-1">记录数</div>
-                                    <div class="text-lg font-medium text-secondary">${data.count} 条</div>
+                            <!-- 移动端：横向滚动展示 -->
+                            <div class="flex md:grid md:grid-cols-3 gap-2 overflow-x-auto pb-1 -mx-1 px-1 md:mx-0 md:px-0 md:pb-0">
+                                <div class="bg-secondary-light/50 p-2 rounded-lg flex-shrink-0 min-w-[100px] md:min-w-0 md:p-3">
+                                    <div class="text-xs text-gray-500 mb-0.5 md:mb-1">均价</div>
+                                    <div class="text-base font-medium text-primary md:text-lg">¥${avgPrice}</div>
                                 </div>
-                                <div class="bg-secondary-light/50 p-3 rounded-lg">
-                                    <div class="text-xs text-gray-500 mb-1">最小单位均价</div>
-                                    <div class="text-lg font-medium text-secondary">¥${avgPrice}</div>
+                                <div class="bg-secondary-light/50 p-2 rounded-lg flex-shrink-0 min-w-[100px] md:min-w-0 md:p-3">
+                                    <div class="text-xs text-gray-500 mb-0.5 md:mb-1">最低价</div>
+                                    <div class="text-base font-medium text-success md:text-lg">¥${minPrice}</div>
                                 </div>
-                                <div class="bg-secondary-light/50 p-3 rounded-lg">
-                                    <div class="text-xs text-gray-500 mb-1">最低单价</div>
-                                    <div class="text-lg font-medium text-secondary">¥${minPrice}</div>
-                                </div>
-                                <div class="bg-secondary-light/50 p-3 rounded-lg">
-                                    <div class="text-xs text-gray-500 mb-1">最高单价</div>
-                                    <div class="text-lg font-medium text-secondary">¥${maxPrice}</div>
+                                <div class="bg-secondary-light/50 p-2 rounded-lg flex-shrink-0 min-w-[100px] md:min-w-0 md:p-3">
+                                    <div class="text-xs text-gray-500 mb-0.5 md:mb-1">最高价</div>
+                                    <div class="text-base font-medium text-danger md:text-lg">¥${maxPrice}</div>
                                 </div>
                             </div>
                         </div>
                     `;
                 } else {
                     // 空数据提示（桌面端）
-                    tableBody.innerHTML = `<tr><td colspan="6" class="py-16 text-center text-gray-500 text-lg">暂无${subType}的价格数据 📭</td></tr>`;
-                    
+                    tableBody.innerHTML = `<tr><td colspan="6" class="py-16 text-center text-gray-500 text-lg">暂无${subType}的价格数据</td></tr>`;
+
                     // 空数据提示（移动端）
                     mobileList.innerHTML = `
                         <div class="card p-10 text-center text-gray-500">
-                            <i class="fa fa-inbox text-3xl mb-3"></i>
+                            <i class="fa fa-inbox text-3xl mb-3 text-gray-400"></i>
                             <p>暂无${subType}的价格数据</p>
-                            <p class="text-sm text-gray-400 mt-1">📭</p>
                         </div>
                     `;
                     
@@ -422,7 +538,7 @@
             })
             .catch(error => {
                 console.error('价格查询失败：', error);
-                alert('网络错误，请重试！');
+                showToast('网络错误，请重试！', 'error');
             });
         }
     </script>

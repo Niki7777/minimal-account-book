@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>待收货 - 极简记账本</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         tailwind.config = {
             theme: {
@@ -25,6 +25,14 @@
                     },
                     fontFamily: {
                         sans: ['Inter', 'Microsoft YaHei', 'sans-serif']
+                    },
+                    fontSize: {
+                        'xs': ['0.75rem', { lineHeight: '1rem' }],
+                        'sm': ['0.875rem', { lineHeight: '1.25rem' }],
+                        'base': ['1rem', { lineHeight: '1.5rem' }],
+                        'lg': ['1.125rem', { lineHeight: '1.75rem' }],
+                        'xl': ['1.25rem', { lineHeight: '1.75rem' }],
+                        '2xl': ['1.5rem', { lineHeight: '2rem' }]
                     },
                     boxShadow: {
                         'card': '0 2px 8px 0 rgba(0, 0, 0, 0.08)',
@@ -47,7 +55,7 @@
                 @apply shadow-card-hover transform -translate-y-1;
             }
             .btn {
-                @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+                @apply px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
             }
             .btn-primary {
                 @apply bg-primary text-white hover:bg-primary/90 focus:ring-primary;
@@ -63,6 +71,22 @@
             }
             .btn-outline {
                 @apply border border-border-color text-secondary hover:bg-secondary-light focus:ring-primary;
+            }
+            /* 移动端友好按钮样式 - 浅色背景配彩色文字 */
+            .btn-edit {
+                @apply px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 bg-amber-100 text-amber-600 hover:bg-amber-200 active:bg-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-400 flex items-center justify-center gap-1;
+            }
+            .btn-use {
+                @apply px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 bg-emerald-100 text-emerald-600 hover:bg-emerald-200 active:bg-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-400 flex items-center justify-center gap-1;
+            }
+            .btn-delete {
+                @apply px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 bg-rose-100 text-rose-600 hover:bg-rose-200 active:bg-rose-300 focus:outline-none focus:ring-2 focus:ring-rose-400 flex items-center justify-center gap-1;
+            }
+            .btn-action {
+                @apply px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 bg-blue-100 text-blue-600 hover:bg-blue-200 active:bg-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400 flex items-center justify-center gap-1;
+            }
+            .btn-neutral {
+                @apply px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 bg-gray-100 text-gray-600 hover:bg-gray-200 active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 flex items-center justify-center gap-1;
             }
             .input {
                 @apply w-full px-4 py-2 border border-border-color rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
@@ -130,6 +154,29 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
+        
+        /* 移动端弹窗动画 */
+        .modal-backdrop {
+            transition: opacity 0.3s ease;
+        }
+        .modal-backdrop.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .modal-backdrop:not(.hidden) {
+            opacity: 1;
+        }
+        .modal-backdrop:not(.hidden) .modal-content {
+            transform: translateY(0);
+        }
+        @media (min-width: 768px) {
+            .modal-backdrop.hidden .modal-content {
+                transform: scale(0.95);
+            }
+            .modal-backdrop:not(.hidden) .modal-content {
+                transform: scale(1);
+            }
+        }
     </style>
 </head>
 <body class="bg-light font-sans">
@@ -137,7 +184,7 @@
     <main class="flex-grow container mx-auto px-4 py-6 pb-20">
         <div class="space-y-6">
             <div class="flex justify-between items-center">
-                <h1 class="text-xl sm:text-2xl font-bold text-secondary">待收货</h1>
+                <h1 class="text-2xl font-bold text-secondary">待收货</h1>
             </div>
 
         <!-- 待收货列表表格 - 桌面端 -->
@@ -145,27 +192,27 @@
             <table class="w-full border-collapse" id="pendingTable">
                 <thead>
                     <tr class="bg-secondary-light">
-                        <th class="px-4 py-3 text-left text-sm font-medium text-secondary border-b border-border-color whitespace-nowrap">消费内容</th>
-                        <th class="px-4 py-3 text-left text-sm font-medium text-secondary border-b border-border-color whitespace-nowrap">总价</th>
-                        <th class="px-4 py-3 text-left text-sm font-medium text-secondary border-b border-border-color whitespace-nowrap">购买渠道</th>
-                        <th class="px-4 py-3 text-left text-sm font-medium text-secondary border-b border-border-color whitespace-nowrap">购买日期</th>
-                        <th class="px-4 py-3 text-left text-sm font-medium text-secondary border-b border-border-color whitespace-nowrap">取件码</th>
-                        <th class="px-4 py-3 text-left text-sm font-medium text-secondary border-b border-border-color whitespace-nowrap">操作</th>
+                        <th class="px-4 py-3 text-left text-base font-medium text-secondary border-b border-border-color whitespace-nowrap">消费内容</th>
+                        <th class="px-4 py-3 text-left text-base font-medium text-secondary border-b border-border-color whitespace-nowrap">总价</th>
+                        <th class="px-4 py-3 text-left text-base font-medium text-secondary border-b border-border-color whitespace-nowrap">购买渠道</th>
+                        <th class="px-4 py-3 text-left text-base font-medium text-secondary border-b border-border-color whitespace-nowrap">购买日期</th>
+                        <th class="px-4 py-3 text-left text-base font-medium text-secondary border-b border-border-color whitespace-nowrap">取件码</th>
+                        <th class="px-4 py-3 text-left text-base font-medium text-secondary border-b border-border-color whitespace-nowrap">操作</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% if pending_list %}
                         {% for item in pending_list %}
                         <tr data-id="{{ item.id }}" class="table-hover">
-                            <td class="px-4 py-3 text-sm border-b whitespace-nowrap">{{ item.content }}</td>
-                            <td class="px-4 py-3 text-sm font-medium text-secondary border-b whitespace-nowrap">¥{{ item.total_price }}</td>
-                            <td class="px-4 py-3 text-sm border-b whitespace-nowrap">{{ item.channel }}</td>
-                            <td class="px-4 py-3 text-sm border-b whitespace-nowrap create-time">{{ item.create_time }}</td>
-                            <td class="px-4 py-3 text-sm border-b whitespace-nowrap">{{ item.pickup_code or '-' }}</td>
-                            <td class="px-4 py-3 text-sm border-b whitespace-nowrap">
+                            <td class="px-4 py-3 text-base border-b whitespace-nowrap">{{ item.content }}</td>
+                            <td class="px-4 py-3 text-base font-medium text-secondary border-b whitespace-nowrap">¥{{ item.total_price }}</td>
+                            <td class="px-4 py-3 text-base border-b whitespace-nowrap">{{ item.channel }}</td>
+                            <td class="px-4 py-3 text-base border-b whitespace-nowrap create-time">{{ item.create_time }}</td>
+                            <td class="px-4 py-3 text-base border-b whitespace-nowrap">{{ item.pickup_code or '-' }}</td>
+                            <td class="px-4 py-3 text-base border-b whitespace-nowrap">
                                 <div class="flex items-center gap-2">
-                                    <button class="btn btn-primary btn-sm" onclick="addPickupCode({{ item.id }})">添加取件码</button>
-                                    <button class="btn btn-success btn-sm" onclick="confirmReceive({{ item.id }})">确认收货</button>
+                                    <button class="btn-action text-base" onclick="addPickupCode({{ item.id }})"><i class="fa fa-qrcode"></i>添加取件码</button>
+                                    <button class="btn-use text-base" onclick="confirmReceive({{ item.id }})"><i class="fa fa-check"></i>确认收货</button>
                                 </div>
                             </td>
                         </tr>
@@ -189,7 +236,6 @@
                     <div class="flex justify-between items-start mb-3">
                         <div>
                             <h3 class="font-medium text-secondary mb-1">{{ item.content }}</h3>
-                            <p class="text-sm text-gray-500">ID: {{ item.id }}</p>
                         </div>
                         <span class="px-2 py-1 text-xs rounded bg-warning/10 text-warning">
                             待收货
@@ -210,8 +256,8 @@
                         </div>
                     </div>
                     <div class="flex gap-2">
-                        <button class="flex-1 py-2 text-sm btn btn-primary" onclick="addPickupCode({{ item.id }})">添加取件码</button>
-                        <button class="flex-1 py-2 text-sm btn btn-success" onclick="confirmReceive({{ item.id }})">确认收货</button>
+                        <button class="btn-action flex-1" onclick="addPickupCode({{ item.id }})"><i class="fa fa-qrcode"></i>添加取件码</button>
+                        <button class="btn-use flex-1" onclick="confirmReceive({{ item.id }})"><i class="fa fa-check"></i>确认收货</button>
                     </div>
                 </div>
                 {% endfor %}
@@ -225,18 +271,58 @@
         </div>
     </main>
 
-    <!-- 取件码输入弹窗 -->
-    <div id="pickupCodeModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">添加取件码</h3>
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">取件码</label>
-                <input type="text" id="pickupCodeInput" class="input" placeholder="请输入取件码" maxlength="50">
+    <!-- 取件码输入弹窗 - 移动端风格 -->
+    <div id="pickupCodeModal" class="fixed inset-0 bg-black/60 z-50 hidden modal-backdrop">
+        <div class="absolute inset-x-0 bottom-0 md:inset-0 md:flex md:items-center md:justify-center md:p-4">
+            <div class="bg-white w-full md:w-full md:max-w-sm md:rounded-2xl rounded-t-2xl shadow-2xl modal-content transform transition-transform duration-300 translate-y-full md:translate-y-0">
+                <!-- 头部 -->
+                <div class="p-4 border-b flex justify-between items-center bg-gray-50 relative">
+                    <div class="md:hidden w-12 h-1 bg-gray-300 rounded-full mx-auto absolute top-2 left-1/2 -translate-x-1/2"></div>
+                    <h3 class="text-lg font-semibold text-gray-800 mt-2 md:mt-0">添加取件码</h3>
+                    <button onclick="closePickupCodeModal()" class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 text-gray-600 hover:bg-gray-300 transition-colors">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+                <!-- 内容区域 -->
+                <div class="p-4 md:p-6">
+                    <div class="mb-4">
+                        <label class="block text-base font-medium text-gray-700 mb-3">取件码</label>
+                        <input type="text" id="pickupCodeInput" class="input w-full text-base py-3" placeholder="请输入取件码" maxlength="50">
+                    </div>
+                </div>
+                <!-- 底部按钮 -->
+                <div class="p-4 border-t bg-gray-50 flex gap-3">
+                    <button id="cancelPickupCode" class="btn-neutral flex-1 py-3" onclick="closePickupCodeModal()"><i class="fa fa-times"></i>取消</button>
+                    <button id="submitPickupCode" class="btn-action flex-1 py-3" onclick="submitPickupCode()"><i class="fa fa-check"></i>确认</button>
+                </div>
             </div>
-            <div class="flex justify-end gap-3 mt-6">
-                <button id="cancelPickupCode" class="btn btn-secondary" onclick="closePickupCodeModal()">取消</button>
-                <button id="submitPickupCode" class="btn btn-primary" onclick="submitPickupCode()">确认</button>
+        </div>
+    </div>
+
+    <!-- 移动端风格确认弹窗 -->
+    <div id="mobileConfirmModal" class="fixed inset-0 bg-black/60 z-50 hidden modal-backdrop">
+        <div class="absolute inset-x-0 bottom-0 md:inset-0 md:flex md:items-center md:justify-center md:p-4">
+            <div class="bg-white w-full md:w-full md:max-w-sm md:rounded-2xl rounded-t-2xl shadow-2xl modal-content transform transition-transform duration-300 translate-y-full md:translate-y-0">
+                <div class="p-6 text-center">
+                    <div class="w-14 h-14 mx-auto mb-4 rounded-full bg-orange-100 flex items-center justify-center">
+                        <i class="fa fa-question text-2xl text-orange-500"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2" id="confirmTitle">确认操作</h3>
+                    <p class="text-gray-600 text-base" id="confirmMessage">确定要执行此操作吗？</p>
+                </div>
+                <div class="p-4 border-t bg-gray-50 flex gap-3">
+                    <button onclick="closeMobileConfirm()" class="btn-neutral flex-1 py-3">取消</button>
+                    <button onclick="executeMobileConfirm()" class="btn-action flex-1 py-3">确认</button>
+                </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Toast 轻提示 -->
+    <div id="toast" class="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 hidden">
+        <div class="bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3 min-w-[200px] max-w-[80vw]">
+            <i class="fas fa-info-circle" id="toastIcon"></i>
+            <span id="toastMessage" class="text-sm">提示信息</span>
         </div>
     </div>
 
@@ -275,6 +361,65 @@
     <script>
         // 全局变量存储当前操作的ID
         let currentPickupCodeId = null;
+        let mobileConfirmCallback = null;
+        let currentReceiveId = null;
+
+        // 移动端风格确认弹窗
+        function showMobileConfirm(title, message, callback, type = 'warning') {
+            document.getElementById('confirmTitle').textContent = title;
+            document.getElementById('confirmMessage').textContent = message;
+            mobileConfirmCallback = callback;
+            
+            const iconContainer = document.querySelector('#mobileConfirmModal .rounded-full');
+            const icon = iconContainer.querySelector('i');
+            
+            if (type === 'warning') {
+                iconContainer.className = 'w-14 h-14 mx-auto mb-4 rounded-full bg-orange-100 flex items-center justify-center';
+                icon.className = 'fa fa-question text-2xl text-orange-500';
+            } else if (type === 'danger') {
+                iconContainer.className = 'w-14 h-14 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center';
+                icon.className = 'fa fa-exclamation text-2xl text-red-500';
+            }
+            
+            document.getElementById('mobileConfirmModal').classList.remove('hidden');
+        }
+
+        function closeMobileConfirm() {
+            document.getElementById('mobileConfirmModal').classList.add('hidden');
+            mobileConfirmCallback = null;
+        }
+
+        function executeMobileConfirm() {
+            if (mobileConfirmCallback) {
+                mobileConfirmCallback();
+            }
+            closeMobileConfirm();
+        }
+
+        // 显示 Toast 轻提示
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const msg = document.getElementById('toastMessage');
+            const icon = document.getElementById('toastIcon');
+            
+            msg.textContent = message;
+            
+            // 设置图标和颜色
+            if (type === 'error') {
+                icon.className = 'fas fa-times-circle text-red-400';
+            } else if (type === 'success') {
+                icon.className = 'fas fa-check-circle text-green-400';
+            } else {
+                icon.className = 'fas fa-info-circle text-blue-400';
+            }
+            
+            toast.classList.remove('hidden');
+            
+            // 3秒后自动隐藏
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
 
         // 格式化日期显示
         function formatDateDisplay(dateStr) {
@@ -325,7 +470,7 @@
 
             const pickupCode = document.getElementById('pickupCodeInput').value.trim();
             if (!pickupCode) {
-                alert('请输入取件码');
+                showToast('请输入取件码', 'info');
                 return;
             }
 
@@ -340,16 +485,17 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('取件码添加成功！');
-                    // 刷新页面
-                    window.location.reload();
+                    showToast('取件码添加成功！', 'success');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
                 } else {
-                    alert('更新失败：' + data.message);
+                    showToast('更新失败：' + data.message, 'error');
                 }
             })
             .catch(error => {
                 console.error('添加取件码失败：', error);
-                alert('网络错误，请重试！');
+                showToast('网络错误，请重试！', 'error');
             })
             .finally(() => {
                 closePickupCodeModal();
@@ -358,10 +504,14 @@
 
         // 确认收货
         function confirmReceive(id) {
-            if (!confirm('确定要标记为「已收货」吗？')) {
-                return;
-            }
+            currentReceiveId = id;
+            showMobileConfirm('确认收货', '确定要标记为「已收货」吗？', function() {
+                executeReceive(currentReceiveId);
+            }, 'warning');
+        }
 
+        // 执行收货
+        function executeReceive(id) {
             // 调用更新接口
             fetch(`/api/consumption/${id}`, {
                 method: 'PUT',
@@ -373,16 +523,17 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('收货状态更新成功！');
-                    // 刷新页面
-                    window.location.reload();
+                    showToast('收货状态更新成功！', 'success');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
                 } else {
-                    alert('更新失败：' + data.message);
+                    showToast('更新失败：' + data.message, 'error');
                 }
             })
             .catch(error => {
                 console.error('确认收货失败：', error);
-                alert('网络错误，请重试！');
+                showToast('网络错误，请重试！', 'error');
             });
         }
     </script>
