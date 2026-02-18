@@ -46,81 +46,8 @@
             }
         }
     </script>
-    <!-- 自定义工具类 -->
-    <style type="text/tailwindcss">
-        @layer utilities {
-            .content-auto {
-                content-visibility: auto;
-            }
-            .card {
-                @apply bg-white rounded-xl shadow-card transition-all duration-300;
-            }
-            .card:hover {
-                @apply shadow-card-hover transform -translate-y-1;
-            }
-            .btn {
-                @apply px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
-            }
-            .btn-primary {
-                @apply bg-primary text-white hover:bg-primary/90 focus:ring-primary;
-            }
-            .btn-secondary {
-                @apply bg-secondary text-white hover:bg-secondary/90 focus:ring-secondary;
-            }
-            .btn-success {
-                @apply bg-success text-white hover:bg-success/90 focus:ring-success;
-            }
-            .btn-danger {
-                @apply bg-danger text-white hover:bg-danger/90 focus:ring-danger;
-            }
-            .btn-warning {
-                @apply bg-warning text-white hover:bg-warning/90 focus:ring-warning;
-            }
-            .btn-outline {
-                @apply border border-border-color text-secondary hover:bg-secondary-light focus:ring-primary;
-            }
-            /* 移动端友好按钮样式 - 浅色背景配彩色文字 */
-            .btn-edit {
-                @apply px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 bg-amber-100 text-amber-600 hover:bg-amber-200 active:bg-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-400 flex items-center justify-center gap-1;
-            }
-            .btn-use {
-                @apply px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 bg-emerald-100 text-emerald-600 hover:bg-emerald-200 active:bg-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-400 flex items-center justify-center gap-1;
-            }
-            .btn-delete {
-                @apply px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 bg-rose-100 text-rose-600 hover:bg-rose-200 active:bg-rose-300 focus:outline-none focus:ring-2 focus:ring-rose-400 flex items-center justify-center gap-1;
-            }
-            .btn-action {
-                @apply px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 bg-blue-100 text-blue-600 hover:bg-blue-200 active:bg-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400 flex items-center justify-center gap-1;
-            }
-            .btn-neutral {
-                @apply px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 bg-gray-100 text-gray-600 hover:bg-gray-200 active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 flex items-center justify-center gap-1;
-            }
-            .input {
-                @apply w-full px-4 py-2 border border-border-color rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
-            }
-            .select {
-                @apply w-full px-4 py-2 border border-border-color rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
-            }
-            .nav-item {
-                @apply flex flex-col items-center justify-center gap-1 px-4 py-3 transition-all duration-200 relative;
-            }
-            .nav-item.active {
-                @apply text-primary;
-            }
-            .nav-item.active::after {
-                @apply content-[''] absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-primary rounded-full;
-            }
-            .nav-item:hover {
-                @apply text-primary;
-            }
-            .nav-icon {
-                @apply text-xl;
-            }
-            .nav-label {
-                @apply text-xs font-medium;
-            }
-        }
-    </style>
+    <!-- 引入公共样式 -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <style>
         /* 全局样式 */
         body {
@@ -145,19 +72,20 @@
     </style>
 </head>
 <body class="bg-light font-sans">
+    <script src="{{ url_for('static', filename='js/common.js') }}"></script>
     <!-- 主内容区 -->
     <main class="flex-grow container mx-auto px-4 py-6 pb-20">
         <div class="space-y-6">
             <div class="flex justify-between items-center">
-                <h1 class="text-2xl font-bold text-secondary">设置</h1>
+                <h1 class="text-xl font-bold text-secondary">设置</h1>
             </div>
 
             <!-- 渠道管理 -->
-            <div class="card p-6">
-                <h3 class="text-lg font-semibold text-secondary mb-4">购买渠道管理</h3>
-                <div class="flex flex-col md:flex-row gap-4 mb-6">
-                    <input type="text" id="channelName" placeholder="请输入渠道名称" class="input flex-1 text-base">
-                    <button class="btn-action whitespace-nowrap text-base" onclick="addChannel()">
+            <div class="card p-4">
+                <h3 class="text-base font-semibold text-secondary mb-3">购买渠道管理</h3>
+                <div class="flex flex-col md:flex-row gap-3 mb-4">
+                    <input type="text" id="channelName" placeholder="请输入渠道名称" class="input flex-1 text-sm">
+                    <button class="btn-action" onclick="addChannel()">
                         <i class="fa fa-plus"></i>添加渠道
                     </button>
                 </div>
@@ -165,20 +93,20 @@
                     <table class="w-full">
                         <thead class="bg-secondary-light">
                             <tr>
-                                <th class="px-4 py-3 text-left text-base font-medium text-secondary border-b border-border-color">渠道名称</th>
-                                <th class="px-4 py-3 text-left text-base font-medium text-secondary border-b border-border-color w-32">操作</th>
+                                <th class="px-3 py-2 text-left text-sm font-medium text-secondary border-b border-border-color">渠道名称</th>
+                                <th class="px-3 py-2 text-left text-sm font-medium text-secondary border-b border-border-color w-32">操作</th>
                             </tr>
                         </thead>
                         <tbody id="channelTable">
                             {% for ch in channels %}
                             <tr class="hover:bg-secondary-light/50 transition-colors">
-                                <td class="px-4 py-3 text-base border-b border-border-color">{{ ch.name }}</td>
-                                <td class="px-4 py-3 text-base border-b">
-                                        <div class="flex items-center gap-2">
-                                            <button class="btn-edit whitespace-nowrap text-base" onclick="editChannel({{ ch.id }}, '{{ ch.name }}')">
+                                <td class="px-3 py-2 text-sm border-b border-border-color">{{ ch.name }}</td>
+                                <td class="px-3 py-2 text-sm border-b">
+                                        <div class="flex items-center gap-1">
+                                            <button class="btn-edit whitespace-nowrap" onclick="editChannel({{ ch.id }}, '{{ ch.name }}')">
                                                 <i class="fa fa-pencil"></i>编辑
                                             </button>
-                                            <button class="btn-delete whitespace-nowrap text-base" onclick="deleteChannel({{ ch.id }})">
+                                            <button class="btn-delete whitespace-nowrap" onclick="deleteChannel({{ ch.id }})">
                                                 <i class="fa fa-trash"></i>删除
                                             </button>
                                         </div>
@@ -191,11 +119,11 @@
             </div>
             
             <!-- 账单类型管理 -->
-            <div class="card p-6">
-                <h3 class="text-lg font-semibold text-secondary mb-4">账单类型管理</h3>
-                <div class="flex flex-col md:flex-row gap-4 mb-6">
-                    <input type="text" id="mainTypeName" placeholder="请输入账单类型名称" class="input flex-1 text-base">
-                    <button class="btn-action whitespace-nowrap text-base" onclick="addMainType()">
+            <div class="card p-4">
+                <h3 class="text-base font-semibold text-secondary mb-3">账单类型管理</h3>
+                <div class="flex flex-col md:flex-row gap-3 mb-4">
+                    <input type="text" id="mainTypeName" placeholder="请输入账单类型名称" class="input flex-1 text-sm">
+                    <button class="btn-action" onclick="addMainType()">
                         <i class="fa fa-plus"></i>添加主类型
                     </button>
                 </div>
@@ -203,20 +131,20 @@
                     <table class="w-full">
                         <thead class="bg-secondary-light">
                             <tr>
-                                <th class="px-4 py-3 text-left text-base font-medium text-secondary border-b border-border-color">账单类型名称</th>
-                                <th class="px-4 py-3 text-left text-base font-medium text-secondary border-b border-border-color w-32">操作</th>
+                                <th class="px-3 py-2 text-left text-sm font-medium text-secondary border-b border-border-color">账单类型名称</th>
+                                <th class="px-3 py-2 text-left text-sm font-medium text-secondary border-b border-border-color w-32">操作</th>
                             </tr>
                         </thead>
                         <tbody id="mainTypeTable">
                             {% for mt in main_types %}
                             <tr class="hover:bg-secondary-light/50 transition-colors">
-                                <td class="px-4 py-3 text-base border-b border-border-color">{{ mt.name }}</td>
-                                <td class="px-4 py-3 text-base border-b border-border-color">
-                                        <div class="flex gap-2">
-                                            <button class="btn-edit whitespace-nowrap text-base" onclick="editMainType({{ mt.id }}, '{{ mt.name }}')">
+                                <td class="px-3 py-2 text-sm border-b border-border-color">{{ mt.name }}</td>
+                                <td class="px-3 py-2 text-sm border-b border-border-color">
+                                        <div class="flex gap-1">
+                                            <button class="btn-edit whitespace-nowrap" onclick="editMainType({{ mt.id }}, '{{ mt.name }}')">
                                                 <i class="fa fa-pencil"></i>编辑
                                             </button>
-                                            <button class="btn-delete whitespace-nowrap text-base" onclick="deleteMainType({{ mt.id }})">
+                                            <button class="btn-delete whitespace-nowrap" onclick="deleteMainType({{ mt.id }})">
                                                 <i class="fa fa-trash"></i>删除
                                             </button>
                                         </div>
@@ -229,11 +157,11 @@
             </div>
 
             <!-- 统计类型管理 -->
-            <div class="card p-6">
-                <h3 class="text-lg font-semibold text-secondary mb-4">统计类型管理</h3>
-                <div class="flex flex-col md:flex-row gap-4 mb-6">
-                    <input type="text" id="subTypeName" placeholder="请输入统计类型名称" class="input flex-1 text-base">
-                    <button class="btn-action whitespace-nowrap text-base" onclick="addSubType()">
+            <div class="card p-4">
+                <h3 class="text-base font-semibold text-secondary mb-3">统计类型管理</h3>
+                <div class="flex flex-col md:flex-row gap-3 mb-4">
+                    <input type="text" id="subTypeName" placeholder="请输入统计类型名称" class="input flex-1 text-sm">
+                    <button class="btn-action" onclick="addSubType()">
                         <i class="fa fa-plus"></i>添加统计类型
                     </button>
                 </div>
@@ -241,20 +169,20 @@
                     <table class="w-full">
                         <thead class="bg-secondary-light">
                             <tr>
-                                <th class="px-4 py-3 text-left text-base font-medium text-secondary border-b border-border-color">统计类型名称</th>
-                                <th class="px-4 py-3 text-left text-base font-medium text-secondary border-b border-border-color w-32">操作</th>
+                                <th class="px-3 py-2 text-left text-sm font-medium text-secondary border-b border-border-color">统计类型名称</th>
+                                <th class="px-3 py-2 text-left text-sm font-medium text-secondary border-b border-border-color w-32">操作</th>
                             </tr>
                         </thead>
                         <tbody id="subTypeTable">
                             {% for st in sub_types %}
                             <tr class="hover:bg-secondary-light/50 transition-colors">
-                                <td class="px-4 py-3 text-base border-b border-border-color">{{ st.name }}</td>
-                                <td class="px-4 py-3 text-base border-b border-border-color">
-                                        <div class="flex gap-2">
-                                            <button class="btn-edit whitespace-nowrap text-base" onclick="editSubType({{ st.id }}, '{{ st.name }}')">
+                                <td class="px-3 py-2 text-sm border-b border-border-color">{{ st.name }}</td>
+                                <td class="px-3 py-2 text-sm border-b border-border-color">
+                                        <div class="flex gap-1">
+                                            <button class="btn-edit whitespace-nowrap" onclick="editSubType({{ st.id }}, '{{ st.name }}')">
                                                 <i class="fa fa-pencil"></i>编辑
                                             </button>
-                                            <button class="btn-delete whitespace-nowrap text-base" onclick="deleteSubType({{ st.id }})">
+                                            <button class="btn-delete whitespace-nowrap" onclick="deleteSubType({{ st.id }})">
                                                 <i class="fa fa-trash"></i>删除
                                             </button>
                                         </div>
@@ -306,30 +234,7 @@
     </footer>
 
     <script>
-        // 显示 Toast 轻提示
-        function showToast(message, type = 'info') {
-            const toast = document.getElementById('toast');
-            const msg = document.getElementById('toastMessage');
-            const icon = document.getElementById('toastIcon');
-            
-            msg.textContent = message;
-            
-            // 设置图标和颜色
-            if (type === 'error') {
-                icon.className = 'fas fa-times-circle text-red-400';
-            } else if (type === 'success') {
-                icon.className = 'fas fa-check-circle text-green-400';
-            } else {
-                icon.className = 'fas fa-info-circle text-blue-400';
-            }
-            
-            toast.classList.remove('hidden');
-            
-            // 3秒后自动隐藏
-            setTimeout(() => {
-                toast.classList.add('hidden');
-            }, 3000);
-        }
+
 
         // 渠道管理
         function addChannel() {

@@ -6,6 +6,30 @@
     font-family: "Microsoft YaHei", Arial, sans-serif;
 }
 
+/* 响应式字体大小基础设置 */
+html {
+    font-size: 16px;
+}
+
+/* 小屏幕设备字体缩放 */
+@media (max-width: 375px) {
+    html {
+        font-size: 14px;
+    }
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+@media (min-width: 1024px) {
+    html {
+        font-size: 18px;
+    }
+}
+
 body {
     background-color: #f5f7fa;
     color: #333;
@@ -211,6 +235,209 @@ h3 {
 /* 价格查询结果样式 */
 .price-result {
     margin-top: 25px;
+}
+
+/* 公共按钮样式 - 移动端优化 */
+.btn-edit {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 12px;
+    transition: all 0.2s ease;
+    background-color: #fef3c7;
+    color: #d97706;
+    line-height: 1.4;
+}
+
+.btn-edit:hover, .btn-edit.active {
+    background-color: #fde68a;
+}
+
+.btn-edit:active {
+    background-color: #fcd34d;
+}
+
+.btn-use {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 12px;
+    transition: all 0.2s ease;
+    background-color: #d1fae5;
+    color: #059669;
+    line-height: 1.4;
+}
+
+.btn-use:hover, .btn-use.active {
+    background-color: #a7f3d0;
+}
+
+.btn-use:active {
+    background-color: #6ee7b7;
+}
+
+.btn-delete {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 12px;
+    transition: all 0.2s ease;
+    background-color: #fee2e2;
+    color: #dc2626;
+    line-height: 1.4;
+}
+
+.btn-delete:hover, .btn-delete.active {
+    background-color: #fecaca;
+}
+
+.btn-delete:active {
+    background-color: #fca5a5;
+}
+
+.btn-action {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 12px;
+    transition: all 0.2s ease;
+    background-color: #dbeafe;
+    color: #2563eb;
+    line-height: 1.4;
+}
+
+.btn-action:hover, .btn-action.active {
+    background-color: #bfdbfe;
+}
+
+.btn-action:active {
+    background-color: #93c5fd;
+}
+
+.btn-neutral {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 12px;
+    transition: all 0.2s ease;
+    background-color: #f3f4f6;
+    color: #4b5563;
+    line-height: 1.4;
+}
+
+.btn-neutral:hover, .btn-neutral.active {
+    background-color: #e5e7eb;
+}
+
+.btn-neutral:active {
+    background-color: #d1d5db;
+}
+
+/* 输入框和选择框样式 - 移动端优化 */
+.input {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    line-height: 1.4;
+}
+
+.input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.select {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    background-color: white;
+    line-height: 1.4;
+}
+
+.select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+/* 导航项样式 */
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    padding: 16px 0;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.nav-item.active {
+    color: #3b82f6;
+}
+
+.nav-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50%;
+    height: 2px;
+    background-color: #3b82f6;
+    border-radius: 2px;
+}
+
+.nav-item:hover {
+    color: #3b82f6;
+}
+
+.nav-icon {
+    font-size: 20px;
+    margin-bottom: 2px;
+}
+
+.nav-label {
+    font-size: 12px;
+}
+
+/* 卡片样式 */
+.card {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.12);
+    transform: translateY(-4px);
+}
+
+/* Toast 轻提示样式 */
+.toast {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 50;
+    background-color: #1f2937;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 200px;
+    max-width: 80vw;
 }
 
 /* 响应式适配（适配macOS笔记本/平板） */

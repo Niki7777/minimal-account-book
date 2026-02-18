@@ -54,78 +54,8 @@
             }
         }
     </script>
-    <!-- 自定义工具类 -->
-    <style type="text/tailwindcss">
-        @layer utilities {
-            .content-auto {
-                content-visibility: auto;
-            }
-            .card {
-                @apply bg-white rounded-xl shadow-card transition-all duration-300;
-            }
-            .card:hover {
-                @apply shadow-card-hover transform -translate-y-1;
-            }
-            .btn {
-                @apply px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
-            }
-            .btn-primary {
-                @apply bg-primary text-white hover:bg-primary/90 focus:ring-primary;
-            }
-            .btn-secondary {
-                @apply bg-secondary text-white hover:bg-secondary/90 focus:ring-secondary;
-            }
-            .btn-success {
-                @apply bg-success text-white hover:bg-success/90 focus:ring-success;
-            }
-            .btn-danger {
-                @apply bg-danger text-white hover:bg-danger/90 focus:ring-danger;
-            }
-            .btn-outline {
-                @apply border border-border-color text-secondary hover:bg-secondary-light focus:ring-primary;
-            }
-            /* 移动端友好按钮样式 - 浅色背景配彩色文字 */
-            .btn-edit {
-                @apply px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 bg-amber-100 text-amber-600 hover:bg-amber-200 active:bg-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-400 flex items-center justify-center gap-1;
-            }
-            .btn-use {
-                @apply px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 bg-emerald-100 text-emerald-600 hover:bg-emerald-200 active:bg-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-400 flex items-center justify-center gap-1;
-            }
-            .btn-delete {
-                @apply px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 bg-rose-100 text-rose-600 hover:bg-rose-200 active:bg-rose-300 focus:outline-none focus:ring-2 focus:ring-rose-400 flex items-center justify-center gap-1;
-            }
-            .btn-action {
-                @apply px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 bg-blue-100 text-blue-600 hover:bg-blue-200 active:bg-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400 flex items-center justify-center gap-1;
-            }
-            .btn-neutral {
-                @apply px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 bg-gray-100 text-gray-600 hover:bg-gray-200 active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 flex items-center justify-center gap-1;
-            }
-            .input {
-                @apply w-full px-4 py-2 border border-border-color rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
-            }
-            .select {
-                @apply w-full px-4 py-2 border border-border-color rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
-            }
-            .nav-item {
-                @apply flex flex-col items-center justify-center gap-1 px-4 py-3 transition-all duration-200 relative;
-            }
-            .nav-item.active {
-                @apply text-primary;
-            }
-            .nav-item.active::after {
-                @apply content-[''] absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-primary rounded-full;
-            }
-            .nav-item:hover {
-                @apply text-primary;
-            }
-            .nav-icon {
-                @apply text-xl;
-            }
-            .nav-label {
-                @apply text-xs font-medium;
-            }
-        }
-    </style>
+    <!-- 引入公共样式 -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <style>
         /* 全局样式 */
         body {
@@ -217,48 +147,49 @@
     <main class="flex-grow container mx-auto px-4 py-6 pb-20">
         <div class="space-y-6">
             <div class="flex justify-between items-center">
-                <h1 class="text-2xl font-bold text-secondary">首页</h1>
+                <h1 class="text-xl font-bold text-secondary">首页</h1>
             </div>
 
             <!-- 日期筛选 -->
-            <div class="card p-4 md:p-6">
-                <div class="flex flex-col md:flex-row gap-3 md:gap-4 md:items-end">
-                    <div class="flex flex-col gap-1.5 flex-1">
-                        <label class="text-base font-medium text-secondary">开始日期</label>
-                        <div class="relative date-input-wrapper">
-                            <input
-                                id="startDate"
-                                value="{{ default_start }}"
-                                type="text"
-                                class="input w-full text-base"
-                                placeholder="选择开始日期"
-                            >
+            <div class="card p-3 md:p-4">
+                <div class="flex flex-col gap-2">
+                    <!-- 日期选择器 - 同一排 -->
+                    <div class="flex items-center gap-2">
+                        <div class="flex-1">
+                            <div class="relative date-input-wrapper">
+                                <input
+                                    id="startDate"
+                                    value="{{ default_start }}"
+                                    type="text"
+                                    class="input w-full text-sm"
+                                    placeholder="开始日期"
+                                >
+                            </div>
+                        </div>
+                        <span class="text-gray-400 text-sm">至</span>
+                        <div class="flex-1">
+                            <div class="relative date-input-wrapper">
+                                <input
+                                    id="endDate"
+                                    value="{{ default_end }}"
+                                    type="text"
+                                    class="input w-full text-sm"
+                                    placeholder="结束日期"
+                                >
+                            </div>
                         </div>
                     </div>
-                    <div class="flex flex-col gap-1.5 flex-1">
-                        <label class="text-base font-medium text-secondary">结束日期</label>
-                        <div class="relative date-input-wrapper">
-                            <input
-                                id="endDate"
-                                value="{{ default_end }}"
-                                type="text"
-                                class="input w-full text-base"
-                                placeholder="选择结束日期"
-                            >
-                        </div>
-                    </div>
-                    <div class="flex-shrink-0">
-                        <button onclick="loadStatistics()" class="btn btn-primary w-full md:w-auto py-2.5 px-6 text-base">
-                            <i class="fa fa-search mr-1"></i>查询
-                        </button>
-                    </div>
+                    <!-- 查询按钮 -->
+                    <button onclick="loadStatistics()" class="btn btn-primary w-full py-2 px-4 text-sm">
+                        <i class="fa fa-search mr-1"></i>查询
+                    </button>
                 </div>
             </div>
 
             <!-- 图表 -->
-            <div class="card p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-lg font-semibold text-secondary">消费分布</h2>
+            <div class="card p-4">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-base font-semibold text-secondary">消费分布</h2>
                 </div>
                 <div id="pieChart" class="w-full h-80"></div>
             </div>

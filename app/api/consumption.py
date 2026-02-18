@@ -11,6 +11,26 @@ import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+def parse_purchase_time(time_str):
+    """解析购买时间，支持多种格式"""
+    if not time_str:
+        return None
+    
+    formats = [
+        '%Y-%m-%dT%H:%M',  # ISO格式: 2026-02-18T12:15
+        '%Y-%m-%d %H:%M',  # 带空格格式: 2026-02-18 12:15
+        '%Y-%m-%d %H:%M:%S',  # 带秒格式: 2026-02-18 12:15:00
+    ]
+    
+    for fmt in formats:
+        try:
+            return datetime.strptime(time_str, fmt)
+        except ValueError:
+            continue
+    
+    # 如果所有格式都失败，抛出异常
+    raise ValueError(f"时间格式错误: {time_str}，支持的格式: YYYY-MM-DDTHH:MM 或 YYYY-MM-DD HH:MM")
+
 @api_bp.route('/consumption', methods=['GET'])
 def get_consumption():
     """获取消费项列表"""
@@ -93,7 +113,7 @@ def create_consumption():
         # 处理购买时间
         create_time = datetime.now()
         if schema.purchase_time:
-            create_time = datetime.strptime(schema.purchase_time, '%Y-%m-%dT%H:%M')
+            create_time = parse_purchase_time(schema.purchase_time)
             logger.info(f'使用指定的购买时间: {create_time}')
         else:
             logger.info(f'使用当前时间作为购买时间: {create_time}')
@@ -220,7 +240,7 @@ def update_consumption(id):
             consumption.statistical_status = '计入' if schema.receive_status == '已收货' else '不计入'
         if schema.purchase_time is not None:
             logger.info(f'更新purchase_time: {schema.purchase_time}')
-            consumption.create_time = datetime.strptime(schema.purchase_time, '%Y-%m-%dT%H:%M')
+            consumption.create_time = parse_purchase_time(schema.purchase_time)
         if schema.tag is not None:
             logger.info(f'更新tag: {schema.tag}')
             consumption.tag = schema.tag

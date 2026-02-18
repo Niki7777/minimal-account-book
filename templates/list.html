@@ -50,78 +50,8 @@
             }
         }
     </script>
-    <!-- 自定义工具类 -->
-    <style type="text/tailwindcss">
-        @layer utilities {
-            .content-auto {
-                content-visibility: auto;
-            }
-            .card {
-                @apply bg-white rounded-xl shadow-card transition-all duration-300;
-            }
-            .card:hover {
-                @apply shadow-card-hover transform -translate-y-1;
-            }
-            .btn {
-                @apply px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
-            }
-            .btn-primary {
-                @apply bg-primary text-white hover:bg-primary/90 focus:ring-primary;
-            }
-            .btn-secondary {
-                @apply bg-secondary text-white hover:bg-secondary/90 focus:ring-secondary;
-            }
-            .btn-success {
-                @apply bg-success text-white hover:bg-success/90 focus:ring-success;
-            }
-            .btn-danger {
-                @apply bg-danger text-white hover:bg-danger/90 focus:ring-danger;
-            }
-            .btn-outline {
-                @apply border border-border-color text-secondary hover:bg-secondary-light focus:ring-primary;
-            }
-            /* 移动端友好按钮样式 - 浅色背景配彩色文字 */
-            .btn-edit {
-                @apply px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 bg-amber-100 text-amber-600 hover:bg-amber-200 active:bg-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-400 flex items-center justify-center gap-1;
-            }
-            .btn-use {
-                @apply px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 bg-emerald-100 text-emerald-600 hover:bg-emerald-200 active:bg-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-400 flex items-center justify-center gap-1;
-            }
-            .btn-delete {
-                @apply px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 bg-rose-100 text-rose-600 hover:bg-rose-200 active:bg-rose-300 focus:outline-none focus:ring-2 focus:ring-rose-400 flex items-center justify-center gap-1;
-            }
-            .btn-action {
-                @apply px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 bg-blue-100 text-blue-600 hover:bg-blue-200 active:bg-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400 flex items-center justify-center gap-1;
-            }
-            .btn-neutral {
-                @apply px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 bg-gray-100 text-gray-600 hover:bg-gray-200 active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 flex items-center justify-center gap-1;
-            }
-            .input {
-                @apply w-full px-4 py-2 border border-border-color rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
-            }
-            .select {
-                @apply w-full px-4 py-2 border border-border-color rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
-            }
-            .nav-item {
-                @apply flex flex-col items-center justify-center gap-1 px-4 py-3 transition-all duration-200 relative;
-            }
-            .nav-item.active {
-                @apply text-primary;
-            }
-            .nav-item.active::after {
-                @apply content-[''] absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-primary rounded-full;
-            }
-            .nav-item:hover {
-                @apply text-primary;
-            }
-            .nav-icon {
-                @apply text-xl;
-            }
-            .nav-label {
-                @apply text-xs font-medium;
-            }
-        }
-    </style>
+    <!-- 引入公共样式 -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <style>
         /* 全局样式 */
         body {
@@ -261,47 +191,50 @@
     <main class="flex-grow container mx-auto px-4 py-6 pb-20">
         <div class="space-y-6">
             <div class="flex justify-between items-center">
-                <h1 class="text-2xl font-bold text-secondary">记账</h1>
-                <div class="flex gap-3">
-                    <button class="btn-action text-base" onclick="openAddModal()">
+                <h1 class="text-xl font-bold text-secondary">记账</h1>
+                <div class="flex gap-2">
+                    <button class="btn-action" onclick="openAddModal()">
                         <i class="fa fa-plus"></i>记一笔
                     </button>
-                    <button class="btn-neutral text-base" onclick="openBatchModal()">
+                    <button class="btn-neutral" onclick="openBatchModal()">
                         <i class="fa fa-files-o"></i>批量
                     </button>
                 </div>
             </div>
 
             <!-- 时间范围查询 -->
-            <div class="card p-4">
-                <div class="flex flex-wrap gap-4 items-center">
-                    <div class="flex flex-col gap-1 flex-1 min-w-[200px]">
-                        <label class="text-base font-medium text-secondary">开始日期</label>
-                        <div class="relative date-input-wrapper">
-                            <input
-                                id="startDate"
-                                type="text"
-                                class="input w-full text-base"
-                                placeholder="选择开始日期"
-                            >
+            <div class="card p-3">
+                <div class="flex flex-col gap-2">
+                    <!-- 日期选择器 - 同一排 -->
+                    <div class="flex items-center gap-2">
+                        <div class="flex-1">
+                            <div class="relative date-input-wrapper">
+                                <input
+                                    id="startDate"
+                                    type="text"
+                                    class="input w-full text-sm"
+                                    placeholder="开始日期"
+                                >
+                            </div>
+                        </div>
+                        <span class="text-gray-400 text-sm">至</span>
+                        <div class="flex-1">
+                            <div class="relative date-input-wrapper">
+                                <input
+                                    id="endDate"
+                                    type="text"
+                                    class="input w-full text-sm"
+                                    placeholder="结束日期"
+                                >
+                            </div>
                         </div>
                     </div>
-                    <div class="flex flex-col gap-1 flex-1 min-w-[200px]">
-                        <label class="text-base font-medium text-secondary">结束日期</label>
-                        <div class="relative date-input-wrapper">
-                            <input
-                                id="endDate"
-                                type="text"
-                                class="input w-full text-base"
-                                placeholder="选择结束日期"
-                            >
-                        </div>
-                    </div>
-                    <div class="flex items-end gap-2">
-                        <button onclick="loadConsumptionList()" class="btn-action text-base">
+                    <!-- 操作按钮 -->
+                    <div class="flex gap-2">
+                        <button onclick="loadConsumptionList()" class="btn-action flex-1">
                             <i class="fa fa-search"></i>查询
                         </button>
-                        <button onclick="resetDateRange()" class="btn-neutral">
+                        <button onclick="resetDateRange()" class="btn-neutral flex-1">
                             <i class="fa fa-refresh"></i>重置
                         </button>
                     </div>
@@ -376,55 +309,53 @@
         </div>
     </footer>
 
-    <!-- 单条新增弹窗 - 简洁实用设计 -->
+    <!-- 单条新增弹窗 - 优化布局 -->
     <div id="addModal" class="fixed inset-0 bg-black/60 z-50 hidden modal-backdrop">
         <div class="absolute inset-x-0 bottom-0 md:inset-0 md:flex md:items-center md:justify-center md:p-4">
-            <div class="bg-white w-full md:w-full md:max-w-lg md:rounded-2xl rounded-t-3xl max-h-[90vh] md:max-h-[90vh] overflow-hidden flex flex-col shadow-2xl modal-content transform transition-transform duration-300 translate-y-full md:translate-y-0">
+            <div class="bg-white w-full md:w-full md:max-w-md md:rounded-xl rounded-t-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl modal-content transform transition-transform duration-300 translate-y-full md:translate-y-0">
                 <!-- 头部 -->
-                <div class="px-4 pt-3 pb-3 border-b border-gray-100">
-                    <div class="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-3"></div>
-                    <div class="flex items-center justify-between">
-                        <button onclick="closeAddModal()" class="text-gray-500 px-2 py-1 text-base">取消</button>
-                        <h3 class="text-lg font-semibold text-gray-800">记一笔</h3>
-                        <button onclick="submitAdd()" class="text-primary font-semibold px-2 py-1 text-base">保存</button>
-                    </div>
+                <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-center">
+                    <h3 class="text-lg font-semibold text-gray-800">记一笔</h3>
                 </div>
                 <!-- 内容区域 -->
                 <div class="flex-1 overflow-y-auto p-4 space-y-4">
-                    <!-- 消费内容 - 最常用，放最上面 -->
+                    <!-- 消费内容 -->
                     <div>
-                        <label class="block text-sm text-gray-500 mb-2">消费内容 <span class="text-red-500">*</span></label>
-                        <input type="text" id="content" placeholder="例如：午餐、打车、买书..." class="w-full text-lg bg-gray-50 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-primary/30">
+                        <label class="block text-xs text-gray-500 mb-1.5">消费内容</label>
+                        <input type="text" id="content" placeholder="如：午餐、打车..." class="w-full text-sm bg-gray-50 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-primary/30">
                     </div>
                     
-                    <!-- 金额和数量 - 并排 -->
-                    <div class="flex gap-3">
-                        <div class="flex-1">
-                            <label class="block text-sm text-gray-500 mb-2">金额 <span class="text-red-500">*</span></label>
-                            <div class="flex items-center bg-gray-50 rounded-xl px-4 py-3">
-                                <span class="text-lg text-gray-400 mr-2">¥</span>
-                                <input type="number" id="totalPrice" value="" step="0.01" class="flex-1 text-lg bg-transparent outline-none" placeholder="0.00">
+                    <!-- 金额和数量 -->
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class="col-span-2">
+                            <label class="block text-xs text-gray-500 mb-1.5">金额</label>
+                            <div class="flex items-center bg-gray-50 rounded-lg px-3 py-2.5">
+                                <span class="text-gray-400 mr-2">¥</span>
+                                <input type="number" id="totalPrice" value="" step="0.01" class="flex-1 text-base bg-transparent outline-none font-medium" placeholder="0.00">
                             </div>
                         </div>
-                        <div class="w-24">
-                            <label class="block text-sm text-gray-500 mb-2">数量</label>
-                            <input type="number" id="quantity" value="1" step="0.1" class="w-full text-lg bg-gray-50 rounded-xl px-4 py-3 text-center outline-none focus:ring-2 focus:ring-primary/30">
+                        <div>
+                            <label class="block text-xs text-gray-500 mb-1.5">数量</label>
+                            <div class="flex items-center bg-gray-50 rounded-lg px-2 py-2.5">
+                                <span class="text-gray-400 text-xs mr-1">×</span>
+                                <input type="number" id="quantity" value="1" step="0.1" class="w-full text-sm bg-transparent outline-none text-center" placeholder="数量">
+                            </div>
                         </div>
                     </div>
                     
-                    <!-- 分类选择 - 渠道和类型 -->
+                    <!-- 渠道和类型 -->
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-sm text-gray-500 mb-2">购买渠道 <span class="text-red-500">*</span></label>
-                            <select id="channel" class="w-full text-base bg-gray-50 rounded-xl px-3 py-3 outline-none focus:ring-2 focus:ring-primary/30">
+                            <label class="block text-xs text-gray-500 mb-1.5">购买渠道</label>
+                            <select id="channel" class="w-full text-sm bg-gray-50 rounded-lg px-3 py-2.5 outline-none">
                                 {% for ch in channels %}
                                 <option value="{{ ch.name }}">{{ ch.name }}</option>
                                 {% endfor %}
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm text-gray-500 mb-2">账单类型 <span class="text-red-500">*</span></label>
-                            <select id="mainType" class="w-full text-base bg-gray-50 rounded-xl px-3 py-3 outline-none focus:ring-2 focus:ring-primary/30">
+                            <label class="block text-xs text-gray-500 mb-1.5">账单类型</label>
+                            <select id="mainType" class="w-full text-sm bg-gray-50 rounded-lg px-3 py-2.5 outline-none">
                                 {% for mt in main_types %}
                                 <option value="{{ mt.name }}">{{ mt.name }}</option>
                                 {% endfor %}
@@ -432,45 +363,45 @@
                         </div>
                     </div>
                     
-                    <!-- 统计相关 - 折叠或简化 -->
-                    <div class="border-t border-gray-100 pt-4">
-                        <div class="flex items-center gap-3 mb-3">
-                            <input type="checkbox" id="enableStats" class="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary" onchange="toggleStats(this)">
-                            <label for="enableStats" class="text-sm text-gray-600">计入统计（用于价格分析）</label>
+                    <!-- 统计选项 -->
+                    <div class="bg-gray-50 rounded-lg p-3">
+                        <div class="flex items-center gap-2 mb-2">
+                            <input type="checkbox" id="enableStats" class="w-4 h-4 rounded border-gray-300 text-primary" onchange="toggleStats(this)">
+                            <label for="enableStats" class="text-xs text-gray-600">计入统计（用于价格分析）</label>
                         </div>
-                        <div id="statsSection" class="grid grid-cols-2 gap-3 opacity-50 pointer-events-none transition-opacity">
-                            <div>
-                                <label class="block text-sm text-gray-500 mb-2">统计类型</label>
-                                <select id="subType" class="w-full text-base bg-gray-50 rounded-xl px-3 py-3 outline-none">
-                                    {% for st in sub_types %}
-                                    <option value="{{ st.name }}">{{ st.name }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm text-gray-500 mb-2">换算系数</label>
-                                <input type="number" id="unitCoefficient" value="1" step="0.1" class="w-full text-base bg-gray-50 rounded-xl px-3 py-3 outline-none">
-                            </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <select id="subType" class="w-full text-sm bg-white rounded-lg px-3 py-2 outline-none opacity-50" disabled>
+                                <option value="">统计类型</option>
+                                {% for st in sub_types %}
+                                <option value="{{ st.name }}">{{ st.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <input type="number" id="unitCoefficient" value="1" step="0.1" class="w-full text-sm bg-white rounded-lg px-3 py-2 outline-none text-center opacity-50" placeholder="换算系数" disabled>
                         </div>
                     </div>
                     
-                    <!-- 其他设置 -->
+                    <!-- 收货状态和时间 -->
                     <div class="grid grid-cols-2 gap-3">
-                        <div class="relative">
-                            <label class="block text-sm text-gray-500 mb-2">收货状态</label>
-                            <button type="button" id="receiveStatusBtn" onclick="showReceiveStatusActionSheet()" class="w-full text-base bg-gray-50 rounded-xl px-3 py-3 outline-none focus:ring-2 focus:ring-primary/30 text-left flex items-center justify-between">
-                                <span id="receiveStatusText">已收货</span>
-                                <i class="fa fa-chevron-right text-gray-400 text-sm"></i>
+                        <div>
+                            <label class="block text-xs text-gray-500 mb-1.5">收货状态</label>
+                            <button type="button" id="receiveStatusBtn" onclick="showReceiveStatusActionSheet()" class="w-full text-sm bg-gray-50 rounded-lg px-3 py-2.5 outline-none text-left flex items-center justify-between">
+                                <span id="receiveStatusText" class="text-gray-700">已收货</span>
+                                <i class="fa fa-chevron-down text-gray-400 text-xs"></i>
                             </button>
                             <input type="hidden" id="receiveStatus" value="已收货">
                         </div>
                         <div>
-                            <label class="block text-sm text-gray-500 mb-2">购买时间</label>
+                            <label class="block text-xs text-gray-500 mb-1.5">购买时间</label>
                             <div class="date-input-wrapper">
-                                <input type="text" id="purchaseTime" class="w-full text-base bg-gray-50 rounded-xl px-3 py-3 outline-none" placeholder="选择时间">
+                                <input type="text" id="purchaseTime" class="w-full text-sm bg-gray-50 rounded-lg px-3 py-2.5 outline-none" placeholder="选择时间">
                             </div>
                         </div>
                     </div>
+                </div>
+                <!-- 底部按钮 -->
+                <div class="px-4 pb-4 pt-2 flex gap-3 border-t border-gray-100">
+                    <button onclick="closeAddModal()" class="flex-1 py-3 bg-gray-100 rounded-lg text-gray-600 text-sm font-medium">取消</button>
+                    <button id="addModalSubmitBtn" onclick="submitAdd()" class="flex-1 py-3 bg-primary text-white rounded-lg text-sm font-medium">保存</button>
                 </div>
             </div>
         </div>
@@ -518,107 +449,111 @@
         </div>
     </div>
 
-    <!-- 批量新增弹窗 - 简洁列表设计 -->
+    <!-- 批量新增弹窗 - 优化布局 -->
     <div id="batchModal" class="fixed inset-0 bg-black/60 z-50 hidden modal-backdrop">
         <div class="absolute inset-x-0 bottom-0 md:inset-0 md:flex md:items-center md:justify-center md:p-4">
-            <div class="bg-white w-full md:w-full md:max-w-lg md:rounded-2xl rounded-t-3xl max-h-[90vh] md:max-h-[90vh] overflow-hidden flex flex-col shadow-2xl modal-content transform transition-transform duration-300 translate-y-full md:translate-y-0">
+            <div class="bg-white w-full md:w-full md:max-w-md md:rounded-xl rounded-t-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl modal-content transform transition-transform duration-300 translate-y-full md:translate-y-0">
                 <!-- 头部 -->
-                <div class="px-4 pt-3 pb-3 border-b border-gray-100">
-                    <div class="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-3"></div>
-                    <div class="flex items-center justify-between">
-                        <button onclick="closeBatchModal()" class="text-gray-500 px-2 py-1 text-base">取消</button>
-                        <h3 class="text-lg font-semibold text-gray-800">批量记账</h3>
-                        <button onclick="submitBatch()" class="text-primary font-semibold px-2 py-1 text-base">保存</button>
-                    </div>
+                <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-center">
+                    <h3 class="text-lg font-semibold text-gray-800">批量记账</h3>
                 </div>
                 <!-- 内容区域 -->
-                <div class="flex-1 overflow-y-auto p-4" id="batchModalContent" ontouchmove="event.stopPropagation()">
-                    <!-- 统一设置（可选） -->
-                    <div class="bg-blue-50 rounded-xl p-3 mb-4">
-                        <div class="text-sm text-blue-600 mb-2 font-medium">统一设置（可选）</div>
+                <div class="flex-1 overflow-y-auto p-3 space-y-3" id="batchModalContent" ontouchmove="event.stopPropagation()">
+                    <!-- 统一设置区域 -->
+                    <div class="bg-blue-50 rounded-lg p-2.5 space-y-2.5">
+                        <div class="text-xs text-blue-600 font-medium">统一设置（应用于所有项目）</div>
                         <div class="grid grid-cols-2 gap-2">
-                            <select id="batchDefaultChannel" class="text-sm bg-white rounded-lg px-3 py-2 outline-none" onchange="applyBatchDefaults()">
-                                <option value="">购买渠道</option>
-                                {% for ch in channels %}
-                                <option value="{{ ch.name }}">{{ ch.name }}</option>
-                                {% endfor %}
-                            </select>
-                            <select id="batchDefaultType" class="text-sm bg-white rounded-lg px-3 py-2 outline-none" onchange="applyBatchDefaults()">
-                                <option value="">账单类型</option>
-                                {% for mt in main_types %}
-                                <option value="{{ mt.name }}">{{ mt.name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <!-- 消费项列表 -->
-                    <div id="batchFormContainer" class="space-y-3">
-                        <!-- 初始一行 -->
-                        <div class="batch-item bg-gray-50 rounded-xl p-3">
-                            <div class="flex items-center gap-2 mb-2">
-                                <span class="text-gray-400 text-sm w-6">1</span>
-                                <input type="text" class="batch-content flex-1 bg-white rounded-lg px-3 py-2 text-base outline-none" placeholder="消费内容">
-                                <button onclick="removeBatchItem(this)" class="text-gray-300 hover:text-red-400 w-8">
-                                    <i class="fa fa-times"></i>
-                                </button>
-                            </div>
-                            <div class="flex gap-2 ml-6">
-                                <div class="flex items-center bg-white rounded-lg px-2 py-2 flex-1">
-                                    <span class="text-gray-400 text-sm mr-1">¥</span>
-                                    <input type="number" class="batch-totalPrice w-full bg-transparent outline-none text-base" placeholder="金额" step="0.01">
-                                </div>
-                                <input type="number" class="batch-quantity w-16 bg-white rounded-lg px-2 py-2 text-center text-base outline-none" value="1" step="0.1" placeholder="数量">
-                                <select class="batch-channel w-20 bg-white rounded-lg px-2 py-2 text-sm outline-none">
+                            <div>
+                                <label class="block text-xs text-gray-500 mb-1">购买渠道</label>
+                                <select id="batchDefaultChannel" class="w-full text-xs bg-white rounded px-2 py-1.5 outline-none" onchange="applyBatchDefaults()">
+                                    <option value="">请选择</option>
                                     {% for ch in channels %}
                                     <option value="{{ ch.name }}">{{ ch.name }}</option>
                                     {% endfor %}
                                 </select>
-                                <select class="batch-mainType w-20 bg-white rounded-lg px-2 py-2 text-sm outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-500 mb-1">账单类型</label>
+                                <select id="batchDefaultType" class="w-full text-xs bg-white rounded px-2 py-1.5 outline-none" onchange="applyBatchDefaults()">
+                                    <option value="">请选择</option>
                                     {% for mt in main_types %}
                                     <option value="{{ mt.name }}">{{ mt.name }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
                         </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-xs text-gray-500 mb-1">收货状态</label>
+                                <button type="button" id="batchReceiveStatusBtn" onclick="showBatchReceiveStatusActionSheet()" class="w-full text-xs bg-white rounded px-2 py-1.5 outline-none text-left flex items-center justify-between">
+                                    <span id="batchReceiveStatusText" class="text-gray-700">已收货</span>
+                                    <i class="fa fa-chevron-down text-gray-400 text-xs"></i>
+                                </button>
+                                <input type="hidden" id="batchReceiveStatus" value="已收货">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-500 mb-1">购买时间</label>
+                                <div class="date-input-wrapper">
+                                    <input type="text" id="batchPurchaseTime" class="w-full text-xs bg-white rounded px-2 py-1.5 outline-none" placeholder="选择时间">
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2 mb-1.5">
+                                <input type="checkbox" id="batchEnableStats" class="w-3.5 h-3.5 rounded border-gray-300 text-primary" onchange="toggleBatchStats(this)">
+                                <label for="batchEnableStats" class="text-xs text-gray-600">计入统计（用于价格分析）</label>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <select id="batchSubType" class="w-full text-xs bg-white rounded px-2 py-1.5 outline-none opacity-50" disabled>
+                                    <option value="">统计类型</option>
+                                    {% for st in sub_types %}
+                                    <option value="{{ st.name }}">{{ st.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <input type="number" id="batchUnitCoefficient" value="1" step="0.1" class="w-full text-xs bg-white rounded px-2 py-1.5 outline-none text-center opacity-50" placeholder="换算系数" disabled>
+                            </div>
+                        </div>
                     </div>
-                    
+
+                    <!-- 消费项列表 -->
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-2">消费项目</label>
+                        <div id="batchFormContainer" class="space-y-2">
+                            <!-- 初始一行 -->
+                            <div class="batch-item bg-gray-50 rounded-lg p-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-gray-400 text-xs w-4 flex-shrink-0">1</span>
+                                    <input type="text" class="batch-content flex-1 bg-white rounded px-2 py-1.5 text-xs outline-none" placeholder="消费内容">
+                                    <div class="flex items-center bg-white rounded px-2 py-1.5 w-24">
+                                        <span class="text-gray-400 text-xs mr-1">¥</span>
+                                        <input type="number" class="batch-totalPrice w-full bg-transparent outline-none text-xs" placeholder="金额" step="0.01">
+                                    </div>
+                                    <input type="number" class="batch-quantity w-12 bg-white rounded px-1 py-1.5 text-center text-xs outline-none" value="1" step="0.1" placeholder="数量">
+                                    <button onclick="removeBatchItem(this)" class="text-gray-300 hover:text-red-400 w-5 flex-shrink-0">
+                                        <i class="fa fa-times text-xs"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- 添加按钮 -->
-                    <button onclick="addMoreBatchItem()" class="w-full mt-3 py-3 bg-gray-100 rounded-xl text-gray-600 hover:bg-gray-200 transition-colors flex items-center justify-center gap-2">
-                        <i class="fa fa-plus"></i>
+                    <button onclick="addMoreBatchItem()" class="w-full py-2 bg-gray-100 rounded-lg text-gray-600 hover:bg-gray-200 transition-colors flex items-center justify-center gap-1 text-xs">
+                        <i class="fa fa-plus text-xs"></i>
                         <span>添加一项</span>
                     </button>
+                </div>
+                <!-- 底部按钮 -->
+                <div class="px-4 pb-4 pt-2 flex gap-3 border-t border-gray-100">
+                    <button onclick="closeBatchModal()" class="flex-1 py-3 bg-gray-100 rounded-lg text-gray-600 text-sm font-medium">取消</button>
+                    <button onclick="submitBatch()" class="flex-1 py-3 bg-primary text-white rounded-lg text-sm font-medium">保存</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <script src="{{ url_for('static', filename='js/common.js') }}"></script>
     <script>
-        // 显示 Toast 轻提示
-        function showToast(message, type = 'info') {
-            const toast = document.getElementById('toast');
-            const msg = document.getElementById('toastMessage');
-            const icon = document.getElementById('toastIcon');
-            
-            msg.textContent = message;
-            
-            // 设置图标和颜色
-            if (type === 'error') {
-                icon.className = 'fas fa-times-circle text-red-400';
-            } else if (type === 'success') {
-                icon.className = 'fas fa-check-circle text-green-400';
-            } else {
-                icon.className = 'fas fa-info-circle text-blue-400';
-            }
-            
-            toast.classList.remove('hidden');
-            
-            // 3秒后自动隐藏
-            setTimeout(() => {
-                toast.classList.add('hidden');
-            }, 3000);
-        }
-
         // 初始化日期选择器
         document.addEventListener('DOMContentLoaded', function() {
             // 购买时间选择器
@@ -633,6 +568,19 @@
                         appendTo: document.body,
                         clickOpens: true,
                         allowInput: false
+                    });
+                    
+                    // 批量弹窗日期选择器
+                    flatpickr('#batchPurchaseTime', {
+                        locale: 'zh',
+                        dateFormat: 'Y-m-d H:i',
+                        enableTime: true,
+                        disableMobile: true,
+                        position: 'auto',
+                        appendTo: document.body,
+                        clickOpens: true,
+                        allowInput: false,
+                        defaultDate: new Date()
                     });
                     
                     // 时间范围查询选择器
@@ -667,7 +615,39 @@
             
             // 页面加载时加载消费列表
             loadConsumptionList();
+            
+            // 限制金额输入为两位小数
+            setupPriceInputValidation();
         });
+        
+        // 限制金额输入为两位小数
+        function setupPriceInputValidation() {
+            const priceInputs = document.querySelectorAll('#totalPrice, .batch-totalPrice');
+            priceInputs.forEach(input => {
+                input.addEventListener('input', function(e) {
+                    let value = e.target.value;
+                    // 只允许数字和小数点
+                    value = value.replace(/[^\d.]/g, '');
+                    // 确保只有一个小数点
+                    const parts = value.split('.');
+                    if (parts.length > 2) {
+                        value = parts[0] + '.' + parts.slice(1).join('');
+                    }
+                    // 限制小数点后两位
+                    if (parts.length === 2 && parts[1].length > 2) {
+                        value = parts[0] + '.' + parts[1].substring(0, 2);
+                    }
+                    e.target.value = value;
+                });
+                
+                input.addEventListener('blur', function(e) {
+                    let value = parseFloat(e.target.value);
+                    if (!isNaN(value)) {
+                        e.target.value = value.toFixed(2);
+                    }
+                });
+            });
+        }
         
         // 设置默认时间范围为近一个月
         function setDefaultDateRange() {
@@ -923,14 +903,21 @@
             document.getElementById('addModal').classList.add('hidden');
         }
         function toggleStats(checkbox) {
-            const statsSection = document.getElementById('statsSection');
+            const subType = document.getElementById('subType');
+            const unitCoefficient = document.getElementById('unitCoefficient');
             if (checkbox.checked) {
-                statsSection.classList.remove('opacity-50', 'pointer-events-none');
+                subType.disabled = false;
+                unitCoefficient.disabled = false;
+                subType.classList.remove('opacity-50');
+                unitCoefficient.classList.remove('opacity-50');
             } else {
-                statsSection.classList.add('opacity-50', 'pointer-events-none');
+                subType.disabled = true;
+                unitCoefficient.disabled = true;
+                subType.classList.add('opacity-50');
+                unitCoefficient.classList.add('opacity-50');
                 // 清空统计相关字段
-                document.getElementById('subType').value = '';
-                document.getElementById('unitCoefficient').value = '1';
+                subType.value = '';
+                unitCoefficient.value = '1';
             }
         }
 
@@ -955,10 +942,57 @@
         }
 
         function selectReceiveStatusFromActionSheet(value) {
-            document.getElementById('receiveStatus').value = value;
-            document.getElementById('receiveStatusText').textContent = value;
-            closeReceiveStatusActionSheet();
+            // 如果有批量弹窗的回调，使用它
+            if (window._batchStatusCallback) {
+                window._batchStatusCallback(value);
+                window._batchStatusCallback = null;
+            } else {
+                document.getElementById('receiveStatus').value = value;
+                document.getElementById('receiveStatusText').textContent = value;
+                closeReceiveStatusActionSheet();
+            }
         }
+
+        // 批量弹窗的收货状态选择
+        function showBatchReceiveStatusActionSheet() {
+            const actionSheet = document.getElementById('receiveStatusActionSheet');
+            const currentValue = document.getElementById('batchReceiveStatus').value;
+            
+            // 更新选中状态
+            document.getElementById('check-已收货').classList.add('opacity-0');
+            document.getElementById('check-待收货').classList.add('opacity-0');
+            document.getElementById('check-' + currentValue).classList.remove('opacity-0');
+            
+            // 临时修改确认回调
+            window._batchStatusCallback = function(value) {
+                document.getElementById('batchReceiveStatus').value = value;
+                document.getElementById('batchReceiveStatusText').textContent = value;
+                closeReceiveStatusActionSheet();
+            };
+            
+            actionSheet.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // 批量弹窗的统计选项切换
+        function toggleBatchStats(checkbox) {
+            const subType = document.getElementById('batchSubType');
+            const unitCoefficient = document.getElementById('batchUnitCoefficient');
+            if (checkbox.checked) {
+                subType.disabled = false;
+                unitCoefficient.disabled = false;
+                subType.classList.remove('opacity-50');
+                unitCoefficient.classList.remove('opacity-50');
+            } else {
+                subType.disabled = true;
+                unitCoefficient.disabled = true;
+                subType.classList.add('opacity-50');
+                unitCoefficient.classList.add('opacity-50');
+                subType.value = '';
+                unitCoefficient.value = '1';
+            }
+        }
+
         function submitAdd() {
             const subType = document.getElementById('subType').value;
             const unitCoefficient = document.getElementById('unitCoefficient').value;
@@ -971,14 +1005,14 @@
             
             const data = {
                 content: document.getElementById('content').value,
-                quantity: document.getElementById('quantity').value,
-                totalPrice: document.getElementById('totalPrice').value,
+                quantity: parseFloat(document.getElementById('quantity').value) || 0,
+                total_price: parseFloat(document.getElementById('totalPrice').value) || 0,
                 channel: document.getElementById('channel').value,
-                mainType: document.getElementById('mainType').value,
-                subType: subType,
-                unitCoefficient: unitCoefficient,
-                receiveStatus: document.getElementById('receiveStatus').value,
-                purchaseTime: document.getElementById('purchaseTime').value
+                main_type: document.getElementById('mainType').value,
+                sub_type: subType || null,
+                unit_coefficient: parseFloat(unitCoefficient) || 1.0,
+                receive_status: document.getElementById('receiveStatus').value,
+                purchase_time: document.getElementById('purchaseTime').value
             };
             fetch('/api/consumption', {
                 method: 'POST',
@@ -1003,6 +1037,21 @@
             document.body.style.overflow = 'hidden';
             // 阻止背景页面滚动
             document.body.addEventListener('touchmove', preventBodyScroll, { passive: false });
+            
+            // 初始化默认值
+            document.getElementById('batchReceiveStatus').value = '已收货';
+            document.getElementById('batchReceiveStatusText').textContent = '已收货';
+            document.getElementById('batchEnableStats').checked = false;
+            document.getElementById('batchSubType').value = '';
+            document.getElementById('batchSubType').disabled = true;
+            document.getElementById('batchSubType').classList.add('opacity-50');
+            document.getElementById('batchUnitCoefficient').value = '1';
+            document.getElementById('batchUnitCoefficient').disabled = true;
+            document.getElementById('batchUnitCoefficient').classList.add('opacity-50');
+            
+            // 重置统一设置
+            document.getElementById('batchDefaultChannel').value = '';
+            document.getElementById('batchDefaultType').value = '';
         }
         function closeBatchModal() {
             document.getElementById('batchModal').classList.add('hidden');
@@ -1017,36 +1066,46 @@
             const container = document.getElementById('batchFormContainer');
             const itemCount = container.querySelectorAll('.batch-item').length + 1;
             const newItem = document.createElement('div');
-            newItem.className = 'batch-item bg-gray-50 rounded-xl p-3';
+            newItem.className = 'batch-item bg-gray-50 rounded-lg p-2';
             newItem.innerHTML = `
-                <div class="flex items-center gap-2 mb-2">
-                    <span class="text-gray-400 text-sm w-6">${itemCount}</span>
-                    <input type="text" class="batch-content flex-1 bg-white rounded-lg px-3 py-2 text-base outline-none" placeholder="消费内容">
-                    <button onclick="removeBatchItem(this)" class="text-gray-300 hover:text-red-400 w-8">
-                        <i class="fa fa-times"></i>
-                    </button>
-                </div>
-                <div class="flex gap-2 ml-6">
-                    <div class="flex items-center bg-white rounded-lg px-2 py-2 flex-1">
-                        <span class="text-gray-400 text-sm mr-1">¥</span>
-                        <input type="number" class="batch-totalPrice w-full bg-transparent outline-none text-base" placeholder="金额" step="0.01">
+                <div class="flex items-center gap-2">
+                    <span class="text-gray-400 text-xs w-4 flex-shrink-0">${itemCount}</span>
+                    <input type="text" class="batch-content flex-1 bg-white rounded px-2 py-1.5 text-xs outline-none" placeholder="消费内容">
+                    <div class="flex items-center bg-white rounded px-2 py-1.5 w-24">
+                        <span class="text-gray-400 text-xs mr-1">¥</span>
+                        <input type="number" class="batch-totalPrice w-full bg-transparent outline-none text-xs" placeholder="金额" step="0.01">
                     </div>
-                    <input type="number" class="batch-quantity w-16 bg-white rounded-lg px-2 py-2 text-center text-base outline-none" value="1" step="0.1" placeholder="数量">
-                    <select class="batch-channel w-20 bg-white rounded-lg px-2 py-2 text-sm outline-none">
-                        {% for ch in channels %}
-                        <option value="{{ ch.name }}">{{ ch.name }}</option>
-                        {% endfor %}
-                    </select>
-                    <select class="batch-mainType w-20 bg-white rounded-lg px-2 py-2 text-sm outline-none">
-                        {% for mt in main_types %}
-                        <option value="{{ mt.name }}">{{ mt.name }}</option>
-                        {% endfor %}
-                    </select>
+                    <input type="number" class="batch-quantity w-12 bg-white rounded px-1 py-1.5 text-center text-xs outline-none" value="1" step="0.1" placeholder="数量">
+                    <button onclick="removeBatchItem(this)" class="text-gray-300 hover:text-red-400 w-5 flex-shrink-0">
+                        <i class="fa fa-times text-xs"></i>
+                    </button>
                 </div>
             `;
             container.appendChild(newItem);
             // 应用统一设置
             applyBatchDefaults();
+            // 为新添加的金额输入框设置验证
+            const newPriceInput = newItem.querySelector('.batch-totalPrice');
+            if (newPriceInput) {
+                newPriceInput.addEventListener('input', function(e) {
+                    let value = e.target.value;
+                    value = value.replace(/[^\d.]/g, '');
+                    const parts = value.split('.');
+                    if (parts.length > 2) {
+                        value = parts[0] + '.' + parts.slice(1).join('');
+                    }
+                    if (parts.length === 2 && parts[1].length > 2) {
+                        value = parts[0] + '.' + parts[1].substring(0, 2);
+                    }
+                    e.target.value = value;
+                });
+                newPriceInput.addEventListener('blur', function(e) {
+                    let value = parseFloat(e.target.value);
+                    if (!isNaN(value)) {
+                        e.target.value = value.toFixed(2);
+                    }
+                });
+            }
             // 滚动到新添加的项
             newItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
@@ -1070,46 +1129,40 @@
         }
 
         function applyBatchDefaults() {
-            const defaultChannel = document.getElementById('batchDefaultChannel').value;
-            const defaultType = document.getElementById('batchDefaultType').value;
-            
-            const items = document.querySelectorAll('#batchFormContainer .batch-item');
-            items.forEach(item => {
-                const channelSelect = item.querySelector('.batch-channel');
-                const typeSelect = item.querySelector('.batch-mainType');
-                
-                if (defaultChannel) {
-                    channelSelect.value = defaultChannel;
-                }
-                if (defaultType) {
-                    typeSelect.value = defaultType;
-                }
-            });
+            // 统一设置现在直接用于提交时，无需应用到每行
+            // 此函数保留用于兼容性
         }
         function submitBatch() {
             const items = document.querySelectorAll('#batchFormContainer > div');
             const list = [];
             let isValid = true;
             
+            // 获取统一设置的字段
+            const batchChannel = document.getElementById('batchDefaultChannel').value;
+            const batchType = document.getElementById('batchDefaultType').value;
+            const batchReceiveStatus = document.getElementById('batchReceiveStatus').value;
+            const batchPurchaseTime = document.getElementById('batchPurchaseTime').value;
+            const batchEnableStats = document.getElementById('batchEnableStats').checked;
+            const batchSubType = batchEnableStats ? document.getElementById('batchSubType').value : '';
+            const batchUnitCoefficient = batchEnableStats ? document.getElementById('batchUnitCoefficient').value : '1';
+            
+            // 验证：如果选择了统计类型，则换算系数必填
+            if (batchEnableStats && batchSubType && !batchUnitCoefficient) {
+                showToast('选择统计类型后，换算系数为必填项！', 'info');
+                return;
+            }
+            
             items.forEach(item => {
-                const subType = item.querySelector('.batch-subType').value;
-                const unitCoefficient = item.querySelector('.batch-unitCoefficient').value;
-                
-                // 验证：如果选择了统计类型，则换算系数必填
-                if (subType && !unitCoefficient) {
-                    showToast('选择统计类型后，换算系数为必填项！', 'info');
-                    isValid = false;
-                    return;
-                }
-                
                 list.push({
                     content: item.querySelector('.batch-content').value,
-                    quantity: item.querySelector('.batch-quantity').value,
-                    totalPrice: item.querySelector('.batch-totalPrice').value,
-                    channel: item.querySelector('.batch-channel').value,
-                    mainType: item.querySelector('.batch-mainType').value,
-                    subType: subType,
-                    unitCoefficient: unitCoefficient
+                    quantity: parseFloat(item.querySelector('.batch-quantity').value) || 0,
+                    total_price: parseFloat(item.querySelector('.batch-totalPrice').value) || 0,
+                    channel: batchChannel,
+                    main_type: batchType,
+                    sub_type: batchSubType || null,
+                    unit_coefficient: parseFloat(batchUnitCoefficient) || 1.0,
+                    receive_status: batchReceiveStatus,
+                    purchase_time: batchPurchaseTime || new Date().toISOString()
                 });
             });
             
@@ -1117,20 +1170,28 @@
                 return;
             }
             
-            fetch('/api/consumption/batch', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ list })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    showToast(data.message, 'success');
+            // 批量保存：使用Promise.all并发调用单个保存API
+            Promise.all(list.map(item => 
+                fetch('/api/consumption', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(item)
+                }).then(res => res.json())
+            ))
+            .then(results => {
+                const successCount = results.filter(r => r.success).length;
+                const failCount = results.length - successCount;
+                
+                if (failCount === 0) {
+                    showToast(`成功保存 ${successCount} 条记录！`, 'success');
                     closeBatchModal();
                     loadConsumptionList();
                 } else {
-                    showToast(data.message, 'error');
+                    showToast(`保存完成：${successCount} 条成功，${failCount} 条失败`, 'error');
                 }
+            })
+            .catch(err => {
+                showToast('批量保存失败：' + err.message, 'error');
             });
         }
 
@@ -1138,7 +1199,7 @@
         function editItem(item) {
             // 修改弹窗标题
             document.querySelector('#addModal h3').textContent = '修改消费项';
-            
+
             // 填充到新增弹窗（复用弹窗）
             document.getElementById('content').value = item.content || '';
             document.getElementById('quantity').value = item.quantity || 1;
@@ -1149,29 +1210,29 @@
             document.getElementById('unitCoefficient').value = item.unit_coefficient || 1;
             document.getElementById('receiveStatus').value = item.receive_status || '已收货';
             document.getElementById('purchaseTime').value = item.create_time ? item.create_time : '';
-            
+
             // 替换提交按钮为更新逻辑
-            const submitBtn = document.querySelector('#addModal .btn-action');
+            const submitBtn = document.getElementById('addModalSubmitBtn');
             submitBtn.onclick = function() {
                 const subType = document.getElementById('subType').value;
                 const unitCoefficient = document.getElementById('unitCoefficient').value;
-                
+
                 // 验证：如果选择了统计类型，则换算系数必填
                 if (subType && !unitCoefficient) {
                     showToast('选择统计类型后，换算系数为必填项！', 'info');
                     return;
                 }
-                
+
                 const data = {
                     content: document.getElementById('content').value,
-                    quantity: document.getElementById('quantity').value,
-                    totalPrice: document.getElementById('totalPrice').value,
+                    quantity: parseFloat(document.getElementById('quantity').value) || 0,
+                    total_price: parseFloat(document.getElementById('totalPrice').value) || 0,
                     channel: document.getElementById('channel').value,
-                    mainType: document.getElementById('mainType').value,
-                    subType: subType,
-                    unitCoefficient: unitCoefficient,
-                    receiveStatus: document.getElementById('receiveStatus').value,
-                    purchaseTime: document.getElementById('purchaseTime').value
+                    main_type: document.getElementById('mainType').value,
+                    sub_type: subType || null,
+                    unit_coefficient: parseFloat(unitCoefficient) || 1.0,
+                    receive_status: document.getElementById('receiveStatus').value,
+                    purchase_time: document.getElementById('purchaseTime').value
                 };
                 fetch(`/api/consumption/${item.id}`, {
                     method: 'PUT',
@@ -1187,10 +1248,14 @@
                         // 恢复提交按钮原逻辑
                         submitBtn.onclick = submitAdd;
                         // 恢复弹窗标题
-                        document.querySelector('#addModal h3').textContent = '新增消费项';
+                        document.querySelector('#addModal h3').textContent = '记一笔';
                     } else {
                         showToast(data.message, 'error');
                     }
+                })
+                .catch(error => {
+                    console.error('更新失败:', error);
+                    showToast('更新失败，请重试！', 'error');
                 });
             };
             openAddModal();
@@ -1391,13 +1456,19 @@
         }
 
         // 删除消费项
+        let isDeleting = false;
         function deleteItem(id) {
+            // 防止重复点击
+            if (isDeleting) return;
+            
             // 使用更明确的确认对话框
             const result = window.confirm(`确定删除ID为${id}的消费项吗？`);
             if (result) {
+                isDeleting = true;
                 fetch(`/api/consumption/${id}`, { method: 'DELETE' })
                 .then(res => res.json())
                 .then(data => {
+                    isDeleting = false;
                     if (data.success) {
                         showToast(data.message, 'success');
                         loadConsumptionList();
@@ -1406,6 +1477,7 @@
                     }
                 })
                 .catch(error => {
+                    isDeleting = false;
                     console.error('删除失败：', error);
                     showToast('删除失败，请重试！', 'error');
                 });
